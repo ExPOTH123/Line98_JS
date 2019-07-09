@@ -19,7 +19,7 @@ const bunnyHeight = app.screen.height / rowNum;
 var arrBlocks = new Array(rowNum);
 var arrBlocks_Value = new Array(rowNum);
 const ballNumPerSpawn = 3;
-let timeToSpawn = 2;
+let timeToSpawn = 0.5;
 let timeCount = 0;
 var Color = [0xff0000, 0xbfff00, 0x0080ff];
 var choosenBlock = null;
@@ -70,7 +70,7 @@ app.ticker.add((delta) => {
     //     return;
     // }
 
-    // var deltaTime = delta;
+    // var deltaTime = delta / 60;
     // timeCount += deltaTime;
 
     // if(timeCount >= timeToSpawn) {
@@ -131,6 +131,7 @@ function Spawn() {
         ball.interactive = true;
 
         arrBlocks_Value[realIndex_Row][realIndex_Columns] = colorIndex + 1;
+        CheckBlockAt(block, true);
     }
 
     return true;
@@ -155,7 +156,7 @@ function onBallClick() {
 }
 
 function onBlockClick() {
-    if(this.children[0]) {
+    if (this.children[0]) {
         return;
     }
     const ballX = Math.floor(choosenBlock.parent.x / choosenBlock.parent.width);
@@ -172,12 +173,12 @@ function onBlockClick() {
             this.addChild(choosenBlock);
             choosenBlock = null;
             Spawn();
-            CheckBlockAt(this);
+            CheckBlockAt(this, true);
         }
     }
 }
 
-function CheckBlockAt(block) {
+function CheckBlockAt(block, isClean) {
     const currentColumn = Math.floor(block.x / block.width);
     const currentRow = Math.floor(block.y / block.height);
 
@@ -210,19 +211,6 @@ function CheckBlockAt(block) {
         down++;
     }
 
-    // Clean if >= 5 matches
-    if (matchCount_Up + matchCount_Down - 1 >= 5) {
-        for (var i = 1; i < matchCount_Up; i++) {
-            arrBlocks_Value[currentRow - i][currentColumn] = 0;
-            arrBlocks[currentRow - i][currentColumn].children[0].destroy();
-        }
-
-        for (var i = 1; i < matchCount_Down; i++) {
-            arrBlocks_Value[currentRow + i][currentColumn] = 0;
-            arrBlocks[currentRow + i][currentColumn].children[0].destroy();
-        }
-    }
-
     // Check left
     var matchCount_Left = 0;
     var matchCount_Right = 0;
@@ -249,23 +237,45 @@ function CheckBlockAt(block) {
         right++;
     }
 
-    // Clean if >= 5 matches
-    if (matchCount_Left + matchCount_Right - 1 >= 5) {
-        for (var i = 1; i < matchCount_Left; i++) {
-            arrBlocks_Value[currentRow][currentColumn - i] = 0;
-            arrBlocks[currentRow][currentColumn - i].children[0].destroy();
+    if (isClean) {
+        // Clean if >= 5 matches
+        if (matchCount_Up + matchCount_Down - 1 >= 5) {
+            for (var i = 1; i < matchCount_Up; i++) {
+                arrBlocks_Value[currentRow - i][currentColumn] = 0;
+                arrBlocks[currentRow - i][currentColumn].children[0].destroy();
+            }
+
+            for (var i = 1; i < matchCount_Down; i++) {
+                arrBlocks_Value[currentRow + i][currentColumn] = 0;
+                arrBlocks[currentRow + i][currentColumn].children[0].destroy();
+            }
         }
 
-        for (var i = 1; i < matchCount_Right; i++) {
-            arrBlocks_Value[currentRow][currentColumn + i] = 0;
-            arrBlocks[currentRow][currentColumn + i].children[0].destroy();
+        // Clean if >= 5 matches
+        if (matchCount_Left + matchCount_Right - 1 >= 5) {
+            for (var i = 1; i < matchCount_Left; i++) {
+                arrBlocks_Value[currentRow][currentColumn - i] = 0;
+                arrBlocks[currentRow][currentColumn - i].children[0].destroy();
+            }
+
+            for (var i = 1; i < matchCount_Right; i++) {
+                arrBlocks_Value[currentRow][currentColumn + i] = 0;
+                arrBlocks[currentRow][currentColumn + i].children[0].destroy();
+            }
+        }
+
+        if (matchCount_Left + matchCount_Right - 1 >= 5 || matchCount_Up + matchCount_Down - 1 >= 5) {
+            arrBlocks_Value[currentRow][currentColumn] = 0;
+            arrBlocks[currentRow][currentColumn].children[0].destroy();
         }
     }
+
 
     if (matchCount_Left + matchCount_Right - 1 >= 5 || matchCount_Up + matchCount_Down - 1 >= 5) {
-        arrBlocks_Value[currentRow][currentColumn] = 0;
-        arrBlocks[currentRow][currentColumn].children[0].destroy();
+        return true;
     }
+
+    return false;
 }
 
 Spawn();
