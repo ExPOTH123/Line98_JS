@@ -12,6 +12,7 @@ class Board extends PIXI.Container {
 
 		this.arrBlocks = new Array(this.rowNum);
 		this.arrBlocks_Value = new Array(this.rowNum);
+		this.arrBlocks_Path = new Array(this.rowNum);
 		this.ballNumPerSpawn = 3;
 		this.timeToSpawn = 2;
 		this.timeCount = 0;
@@ -27,6 +28,7 @@ class Board extends PIXI.Container {
 		for (let row = 0; row < this.rowNum; row++) {
 			this.arrBlocks[row] = new Array(this.columnNum);
 			this.arrBlocks_Value[row] = new Array(this.columnNum);
+			this.arrBlocks_Path[row] = new Array(this.columnNum);
 
 			for (let column = 0; column < this.columnNum; column++) {
 				const bunny = new PIXI.Sprite(this.textureBlock);
@@ -47,6 +49,7 @@ class Board extends PIXI.Container {
 
 				this.arrBlocks[row][column] = bunny;
 				this.arrBlocks_Value[row][column] = 0;
+				this.arrBlocks_Path[row][column] = 0;
 			}
 		}
 	}
@@ -95,7 +98,7 @@ class Board extends PIXI.Container {
 			ball.height = block.height / 2;
 			// ball.x = block.x;
 			// ball.y = block.y;
-			ball.tint =this. Color[colorIndex];
+			ball.tint = this.Color[colorIndex];
 			block.addChild(ball);
 
 			ball.on('pointerdown', this.onBallClick);
@@ -110,6 +113,12 @@ class Board extends PIXI.Container {
 	}
 
 	onBallClick() {
+		for (var row = 0; row < this.parent.parent.rowNum; row++) {
+			for (var column = 0; column < this.parent.parent.columnNum; column++) {
+				this.parent.parent.arrBlocks[row][column].tint = 0xffffff;
+			}
+		}
+
 		if (this.parent.parent.choosenBlock != null) {
 			if (this.parent.parent.choosenBlock != this) {
 				this.parent.parent.choosenBlock.scale.x = this.parent.parent.choosenBlock.scale.x / 1.1;
@@ -138,7 +147,9 @@ class Board extends PIXI.Container {
 		const blockY = Math.floor(this.y / this.height);
 
 		if (choosenBlock != null) {
-			if (choosenBlock.parent != this) {
+			this.parent.RecloneArrPath();
+			if (choosenBlock.parent != this && this.parent.FindPath(choosenBlock.parent, this)) {
+				this.parent.RecloneArrPath();
 				this.parent.arrBlocks_Value[blockY][blockX] = this.parent.arrBlocks_Value[ballY][ballX];
 				this.parent.arrBlocks_Value[ballY][ballX] = 0;
 				this.parent.choosenBlock.scale.x = this.parent.choosenBlock.scale.x / 1.1;
@@ -154,7 +165,6 @@ class Board extends PIXI.Container {
 	CheckBlockAt(block, isClean) {
 		const currentColumn = Math.floor(block.x / block.width);
 		const currentRow = Math.floor(block.y / block.height);
-
 
 		var colorToCheck = this.arrBlocks_Value[currentRow][currentColumn];
 
@@ -249,6 +259,122 @@ class Board extends PIXI.Container {
 		}
 
 		return false;
+	}
+
+	FindPath(A, B) {
+		const currentColumn_A = Math.floor(A.x / A.width);
+		const currentRow_A = Math.floor(A.y / A.height);
+		const currentColumn_B = Math.floor(B.x / B.width);
+		const currentRow_B = Math.floor(B.y / B.height);
+		if (A == B) {
+			console.log('---------------------------------');
+
+			this.arrBlocks[currentRow_A][currentColumn_A].tint = this.Color[0];
+			return true;
+		}
+
+		this.arrBlocks[currentRow_A][currentColumn_A].tint = this.Color[0];
+
+		var sideToGo = [];
+		if (currentRow_A - 1 >= 0) {
+			if (this.arrBlocks_Path[currentRow_A - 1][currentColumn_A] == 0) {
+				const vectorAB_X = currentRow_B - (currentRow_A - 1);
+				const vectorAB_Y = currentColumn_B - (currentColumn_A);
+				const distance = Math.sqrt(vectorAB_X * vectorAB_X + vectorAB_Y * vectorAB_Y);
+				sideToGo.push(distance / (Math.floor(distance / 10) + 1) / 10 + 1);
+			}
+		}
+		if (currentRow_A + 1 < this.rowNum) {
+			if (this.arrBlocks_Path[currentRow_A + 1][currentColumn_A] == 0) {
+				const vectorAB_X = currentRow_B - (currentRow_A + 1);
+				const vectorAB_Y = currentColumn_B - (currentColumn_A);
+				const distance = Math.sqrt(vectorAB_X * vectorAB_X + vectorAB_Y * vectorAB_Y);
+				sideToGo.push(distance / (Math.floor(distance / 10) + 1) / 10 + 2);
+			}
+		}
+		if (currentColumn_A - 1 >= 0) {
+			if (this.arrBlocks_Path[currentRow_A][currentColumn_A - 1] == 0) {
+				const vectorAB_X = currentRow_B - (currentRow_A);
+				const vectorAB_Y = currentColumn_B - (currentColumn_A - 1);
+				const distance = Math.sqrt(vectorAB_X * vectorAB_X + vectorAB_Y * vectorAB_Y);
+				sideToGo.push(distance / (Math.floor(distance / 10) + 1) / 10 + 3);
+			}
+		}
+		if (currentColumn_A + 1 < this.columnNum) {
+			if (this.arrBlocks_Path[currentRow_A][currentColumn_A + 1] == 0) {
+				const vectorAB_X = currentRow_B - (currentRow_A);
+				const vectorAB_Y = currentColumn_B - (currentColumn_A + 1);
+				const distance = Math.sqrt(vectorAB_X * vectorAB_X + vectorAB_Y * vectorAB_Y);
+				sideToGo.push(distance / (Math.floor(distance / 10) + 1) / 10 + 4);
+			}
+		}
+
+		sideToGo.sort(function (a, b) { return b % 1 - a % 1 });
+
+		console.log(sideToGo);
+
+		var isCanFindPath = false;
+		var nextStep;
+		var numOfStep = sideToGo.length;
+		for(var i = 0; i < numOfStep; i++) {
+			nextStep = Math.floor(sideToGo.pop());
+			console.log(nextStep);
+
+			if (nextStep == 1) {
+				if (this.arrBlocks_Path[currentRow_A - 1][currentColumn_A] == 0) {
+					this.arrBlocks_Path[currentRow_A - 1][currentColumn_A] = 1;
+					isCanFindPath = this.FindPath(this.arrBlocks[currentRow_A - 1][currentColumn_A], B)
+					if (isCanFindPath) {
+						return isCanFindPath;
+					}
+					
+					this.arrBlocks[currentRow_A - 1][currentColumn_A].tint = 0xffffff;
+				}
+			}
+			else if (nextStep == 2) {
+				if (this.arrBlocks_Path[currentRow_A + 1][currentColumn_A] == 0) {
+					this.arrBlocks_Path[currentRow_A + 1][currentColumn_A] = 1;
+					isCanFindPath = this.FindPath(this.arrBlocks[currentRow_A + 1][currentColumn_A], B)
+					if (isCanFindPath) {
+						return isCanFindPath;
+					}
+
+					this.arrBlocks[currentRow_A + 1][currentColumn_A].tint = 0xffffff;
+				}
+			}
+			else if (nextStep == 3) {
+				if (this.arrBlocks_Path[currentRow_A][currentColumn_A - 1] == 0) {
+					this.arrBlocks_Path[currentRow_A][currentColumn_A - 1] = 1;
+					isCanFindPath = this.FindPath(this.arrBlocks[currentRow_A][currentColumn_A - 1], B)
+					if (isCanFindPath) {
+						return isCanFindPath;
+					}
+
+					this.arrBlocks[currentRow_A][currentColumn_A - 1].tint = 0xffffff;
+				}
+			}
+			else if (nextStep == 4) {
+				if (this.arrBlocks_Path[currentRow_A][currentColumn_A + 1] == 0) {
+					this.arrBlocks_Path[currentRow_A][currentColumn_A + 1] = 1;
+					isCanFindPath = this.FindPath(this.arrBlocks[currentRow_A][currentColumn_A + 1], B)
+					if (isCanFindPath) {
+						return isCanFindPath;
+					}
+
+					this.arrBlocks[currentRow_A][currentColumn_A + 1].tint = 0xffffff;
+				}
+			}
+		}
+
+		return isCanFindPath;
+	}
+
+	RecloneArrPath() {
+		for (var row = 0; row < this.rowNum; row++) {
+			for (var column = 0; column < this.columnNum; column++) {
+				this.arrBlocks_Path[row][column] = this.arrBlocks_Value[row][column] != 0;
+			}
+		}
 	}
 }
 export default Board;
