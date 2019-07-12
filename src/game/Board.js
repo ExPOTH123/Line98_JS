@@ -1,9 +1,9 @@
+import Ball from "../game/Ball.js";
+import Block from "../game/Block.js";
+
 class Board extends PIXI.Container {
 	constructor() {
 		super();
-		// Create a new texture
-		this.textureBlock = PIXI.Texture.from('data/image/bunny.png');
-		this.textureBall = PIXI.Texture.from('data/image/ball.png');
 
 		this.rowNum = 10;
 		this.columnNum = 10;
@@ -13,6 +13,10 @@ class Board extends PIXI.Container {
 		this.arrBlocks = new Array(this.rowNum);
 		this.arrBlocks_Value = new Array(this.rowNum);
 		this.arrBlocks_Path = new Array(this.rowNum);
+
+		this.textureBlock = PIXI.Texture.from('data/image/bunny.png');
+		this.textureBall = PIXI.Texture.from('data/image/ball.png');
+
 		this.ballNumPerSpawn = 3;
 		this.timeToSpawn = 2;
 		this.timeCount = 0;
@@ -31,23 +35,19 @@ class Board extends PIXI.Container {
 			this.arrBlocks_Path[row] = new Array(this.columnNum);
 
 			for (let column = 0; column < this.columnNum; column++) {
-				const bunny = new PIXI.Sprite(this.textureBlock);
-				bunny.anchor.set(0.5, 0.5);
-				bunny.width = this.bunnyWidth;
-				bunny.height = this.bunnyHeight;
-				bunny.x = column * bunny.width + bunny.width / 2;
-				bunny.y = row * bunny.height + bunny.height / 2;
-
-				// make the button interactive...
+				const block = new Block(this.textureBlock);
+				block.sprite.anchor.set(0.5, 0.5);
+				block.sprite.width = this.bunnyWidth;
+				block.sprite.height = this.bunnyHeight;
+				block.sprite.x = column * block.sprite.width + block.sprite.width / 2;
+				block.sprite.y = row * block.sprite.height + block.sprite.height / 2;
 
 				// Pointers normalize touch and mouse
-				bunny.on('pointerdown', this.onBlockClick);
+				block.enableButton(true);
 
-				this.addChild(bunny);
-				bunny.buttonMode = true;
-				bunny.interactive = true;
+				this.addChild(block.sprite);
 
-				this.arrBlocks[row][column] = bunny;
+				this.arrBlocks[row][column] = block.sprite;
 				this.arrBlocks_Value[row][column] = 0;
 				this.arrBlocks_Path[row][column] = 0;
 			}
@@ -92,74 +92,20 @@ class Board extends PIXI.Container {
 
 			var colorIndex = Math.floor(Math.random() * (Object.keys(this.Color).length)); // Random color
 			var block = this.arrBlocks[realIndex_Row][realIndex_Columns];
-			const ball = new PIXI.Sprite(this.textureBall);
-			ball.anchor.set(0.5, 0.5);
-			ball.width = block.width / 2;
-			ball.height = block.height / 2;
-			// ball.x = block.x;
-			// ball.y = block.y;
-			ball.tint = this.Color[colorIndex];
-			block.addChild(ball);
+			var ball = new Ball(this.textureBall);
+			ball.sprite.anchor.set(0.5, 0.5);
+			ball.sprite.width = block.width / 2;
+			ball.sprite.height = block.height / 2;
+			ball.sprite.tint = this.Color[colorIndex];
 
-			ball.on('pointerdown', this.onBallClick);
-			ball.buttonMode = true;
-			ball.interactive = true;
+			ball.enableButton(true);
+			block.addChild(ball.sprite);
 
 			this.arrBlocks_Value[realIndex_Row][realIndex_Columns] = colorIndex + 1;
 			this.CheckBlockAt(block, true);
 		}
 
 		return true;
-	}
-
-	onBallClick() {
-		for (var row = 0; row < this.parent.parent.rowNum; row++) {
-			for (var column = 0; column < this.parent.parent.columnNum; column++) {
-				this.parent.parent.arrBlocks[row][column].tint = 0xffffff;
-			}
-		}
-
-		if (this.parent.parent.choosenBlock != null) {
-			if (this.parent.parent.choosenBlock != this) {
-				this.parent.parent.choosenBlock.scale.x = this.parent.parent.choosenBlock.scale.x / 1.1;
-				this.parent.parent.choosenBlock.scale.y = this.parent.parent.choosenBlock.scale.y / 1.1;
-
-				this.parent.parent.choosenBlock = this;
-				this.parent.parent.choosenBlock.scale.x = this.parent.parent.choosenBlock.scale.x * 1.1;
-				this.parent.parent.choosenBlock.scale.y = this.parent.parent.choosenBlock.scale.y * 1.1;
-			}
-		}
-		else {
-			this.parent.parent.choosenBlock = this;
-			this.parent.parent.choosenBlock.scale.x = this.parent.parent.choosenBlock.scale.x * 1.1;
-			this.parent.parent.choosenBlock.scale.y = this.parent.parent.choosenBlock.scale.y * 1.1;
-		}
-	}
-
-	onBlockClick() {
-		if (this.children[0] || this.parent.choosenBlock == null) {
-			return;
-		}
-		var choosenBlock = this.parent.choosenBlock;
-		const ballX = Math.floor(choosenBlock.parent.x / choosenBlock.parent.width);
-		const ballY = Math.floor(choosenBlock.parent.y / choosenBlock.parent.height);
-		const blockX = Math.floor(this.x / this.width);
-		const blockY = Math.floor(this.y / this.height);
-
-		if (choosenBlock != null) {
-			this.parent.RecloneArrPath();
-			if (choosenBlock.parent != this && this.parent.FindPath(choosenBlock.parent, this)) {
-				this.parent.RecloneArrPath();
-				this.parent.arrBlocks_Value[blockY][blockX] = this.parent.arrBlocks_Value[ballY][ballX];
-				this.parent.arrBlocks_Value[ballY][ballX] = 0;
-				this.parent.choosenBlock.scale.x = this.parent.choosenBlock.scale.x / 1.1;
-				this.parent.choosenBlock.scale.y = this.parent.choosenBlock.scale.y / 1.1;
-				this.addChild(this.parent.choosenBlock);
-				this.parent.choosenBlock = null;
-				this.parent.Spawn();
-				this.parent.CheckBlockAt(this, true);
-			}
-		}
 	}
 
 	CheckBlockAt(block, isClean) {
@@ -264,11 +210,12 @@ class Board extends PIXI.Container {
 	FindPath(A, B) {
 		const currentColumn_A = Math.floor(A.x / A.width);
 		const currentRow_A = Math.floor(A.y / A.height);
+		console.log(B);
 		const currentColumn_B = Math.floor(B.x / B.width);
 		const currentRow_B = Math.floor(B.y / B.height);
+		console.log(currentRow_A + " " + currentColumn_A);
+		console.log(currentRow_B + " " + currentColumn_B);
 		if (A == B) {
-			console.log('---------------------------------');
-
 			this.arrBlocks[currentRow_A][currentColumn_A].tint = this.Color[0];
 			return true;
 		}
@@ -311,14 +258,11 @@ class Board extends PIXI.Container {
 
 		sideToGo.sort(function (a, b) { return b % 1 - a % 1 });
 
-		console.log(sideToGo);
-
 		var isCanFindPath = false;
 		var nextStep;
 		var numOfStep = sideToGo.length;
-		for(var i = 0; i < numOfStep; i++) {
+		for (var i = 0; i < numOfStep; i++) {
 			nextStep = Math.floor(sideToGo.pop());
-			console.log(nextStep);
 
 			if (nextStep == 1) {
 				if (this.arrBlocks_Path[currentRow_A - 1][currentColumn_A] == 0) {
@@ -327,7 +271,7 @@ class Board extends PIXI.Container {
 					if (isCanFindPath) {
 						return isCanFindPath;
 					}
-					
+
 					this.arrBlocks[currentRow_A - 1][currentColumn_A].tint = 0xffffff;
 				}
 			}
