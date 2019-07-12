@@ -37,15 +37,18 @@ class Block {
 		if (choosenBlock != null) {
 			board.RecloneArrPath();
 			if (choosenBlock.parent != this && board.FindPath(choosenBlock.parent, this)) {
-				console.log(board.arrBlocks_Value);
 				board.RecloneArrPath(board.arrBlocks_Value);
+
 				board.arrBlocks_Value[blockY][blockX] = board.arrBlocks_Value[ballY][ballX];
 				board.arrBlocks_Value[ballY][ballX] = 0;
 				board.choosenBlock.scale.x = board.choosenBlock.scale.x / 1.1;
 				board.choosenBlock.scale.y = board.choosenBlock.scale.y / 1.1;
 				this.addChild(board.choosenBlock);
+
 				board.choosenBlock = null;
+
 				board.Spawn();
+				
 				board.CheckBlockAt(this, true);
 			}
 		}

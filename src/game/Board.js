@@ -69,7 +69,6 @@ class Board extends PIXI.Container {
 				if (i != j && indexToSpawn[i] == indexToSpawn[j]) {
 					indexToSpawn[j]++;
 				}
-
 			}
 
 			// Spawn
