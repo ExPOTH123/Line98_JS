@@ -166,9 +166,17 @@ class Board extends PIXI.Container {
 	}
 
 	checkBlockAt(block, isClean) {
+		const currentColumn = Math.floor(block.x / block.width);
+		const currentRow = Math.floor(block.y / block.height);
+		
 		var isScore = false;
 		isScore = this.checkPlus(block, isClean);
 		isScore = this.checkCross(block, isClean);
+
+		if (isScore) {
+			this.arrBlocks_Value[currentRow][currentColumn] = 0;
+			this.arrBlocks[currentRow][currentColumn].children[0].destroy();
+		}
 
 		return isScore;
 	}
@@ -257,11 +265,6 @@ class Board extends PIXI.Container {
 					this.arrBlocks_Value[currentRow][currentColumn + i] = 0;
 					this.arrBlocks[currentRow][currentColumn + i].children[0].destroy();
 				}
-			}
-
-			if (matchCount_Left + matchCount_Right - 1 >= 5 || matchCount_Up + matchCount_Down - 1 >= 5) {
-				this.arrBlocks_Value[currentRow][currentColumn] = 0;
-				this.arrBlocks[currentRow][currentColumn].children[0].destroy();
 			}
 		}
 
@@ -365,11 +368,6 @@ class Board extends PIXI.Container {
 					this.arrBlocks_Value[currentRow + i][currentColumn - i] = 0;
 					this.arrBlocks[currentRow + i][currentColumn - i].children[0].destroy();
 				}
-			}
-
-			if (matchCount_UpLeft + matchCount_DownRight - 1 >= 5 || matchCount_UpRight + matchCount_DownLeft - 1 >= 5) {
-				this.arrBlocks_Value[currentRow][currentColumn] = 0;
-				this.arrBlocks[currentRow][currentColumn].children[0].destroy();
 			}
 		}
 
