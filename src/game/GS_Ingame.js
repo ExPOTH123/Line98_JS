@@ -12,8 +12,8 @@ class GS_Ingame extends PIXI.Container {
         this.board = new Board();
         this.addChild(this.board);
 
-        this.board.Load();
-        this.board.Spawn();
+        this.board.load();
+        this.board.spawn();
     }
 
     Update(deltaTime) {
