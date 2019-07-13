@@ -5,18 +5,14 @@ class Board extends PIXI.Container {
 	constructor() {
 		super();
 
-		this.rowNum = 10;
-		this.columnNum = 10;
-		this.bunnyWidth = GameConfig.width / this.columnNum;
+		this.bunnyWidth = GameConfig.width / GameDefine.COLUMN_NUM;
 		this.bunnyHeight = this.bunnyWidth;
 
-		this.arrBlocks = new Array(this.rowNum);
-		this.arrBlocks_Value = new Array(this.rowNum);
-		this.arrBlocks_Path = new Array(this.rowNum);
+		this.arrBlocks = new Array(GameDefine.ROW_NUM);
+		this.arrBlocks_Value = new Array(GameDefine.ROW_NUM);
+		this.arrBlocks_Path = new Array(GameDefine.ROW_NUM);
 
-		this.ballNumPerSpawn = 3;
-		this.ballAboutToSpawn = new Array(this.ballNumPerSpawn);
-		this.stepsToRealSpawn = 2; // ball will be
+		this.ballAboutToSpawn = new Array(GameDefine.BALL_PER_SPAWN);
 		this.stepsCount = 0;
 		this.isCanSpawn = true;
 
@@ -32,12 +28,12 @@ class Board extends PIXI.Container {
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 	load() {
-		for (let row = 0; row < this.rowNum; row++) {
-			this.arrBlocks[row] = new Array(this.columnNum);
-			this.arrBlocks_Value[row] = new Array(this.columnNum);
-			this.arrBlocks_Path[row] = new Array(this.columnNum);
+		for (let row = 0; row < GameDefine.ROW_NUM; row++) {
+			this.arrBlocks[row] = new Array(GameDefine.COLUMN_NUM);
+			this.arrBlocks_Value[row] = new Array(GameDefine.COLUMN_NUM);
+			this.arrBlocks_Path[row] = new Array(GameDefine.COLUMN_NUM);
 
-			for (let column = 0; column < this.columnNum; column++) {
+			for (let column = 0; column < GameDefine.COLUMN_NUM; column++) {
 				const block = new Block();
 				block.anchor.set(0.5, 0.5);
 				block.width = this.bunnyWidth;
@@ -60,14 +56,14 @@ class Board extends PIXI.Container {
 	spawn() {
 		this.stepsCount++;
 
-		if (this.stepsCount % this.stepsToRealSpawn) {
+		if (this.stepsCount % GameDefine.STEPS_TO_SPAWN) {
 			if (!this.isCanSpawn) {
 				return true;;
 			}
 			this.isCanSpawn = false;
-			const maxBlockNum = this.rowNum * this.columnNum;
+			const maxBlockNum = GameDefine.ROW_NUM * GameDefine.COLUMN_NUM;
 
-			var indexToSpawn = new Array(this.ballNumPerSpawn);
+			var indexToSpawn = new Array(GameDefine.BALL_PER_SPAWN);
 
 			// Random index
 			for (var i = 0; i < indexToSpawn.length; i++) {
@@ -82,8 +78,8 @@ class Board extends PIXI.Container {
 				}
 
 				// Spawn
-				var realIndex_Row = Math.floor(indexToSpawn[i] / this.columnNum);
-				var realIndex_Columns = Math.floor(indexToSpawn[i] % this.columnNum);
+				var realIndex_Row = Math.floor(indexToSpawn[i] / GameDefine.COLUMN_NUM);
+				var realIndex_Columns = Math.floor(indexToSpawn[i] % GameDefine.COLUMN_NUM);
 				var failCount = 0;
 				while (this.arrBlocks_Value[realIndex_Row][realIndex_Columns] != 0) {
 					indexToSpawn[i]++;
@@ -95,8 +91,8 @@ class Board extends PIXI.Container {
 						}
 						indexToSpawn[i] -= maxBlockNum;
 					}
-					realIndex_Row = Math.floor(indexToSpawn[i] / this.columnNum);
-					realIndex_Columns = Math.floor(indexToSpawn[i] % this.columnNum);
+					realIndex_Row = Math.floor(indexToSpawn[i] / GameDefine.COLUMN_NUM);
+					realIndex_Columns = Math.floor(indexToSpawn[i] % GameDefine.COLUMN_NUM);
 				}
 
 				var colorIndex = this.randomColor(); // Random color
@@ -130,7 +126,7 @@ class Board extends PIXI.Container {
 
 	enableSuspendedBall() {
 		this.stepsCount = 0;
-		for (var i = 0; i < this.ballNumPerSpawn; i++) {
+		for (var i = 0; i < GameDefine.BALL_PER_SPAWN; i++) {
 			var block = this.ballAboutToSpawn[i].parent;
 			if (block) {
 				this.ballAboutToSpawn[i].width = this.bunnyWidth / 2;
@@ -204,7 +200,7 @@ class Board extends PIXI.Container {
 		}
 
 		// Check up
-		while (down < this.rowNum) {
+		while (down < GameDefine.ROW_NUM) {
 			if (this.arrBlocks_Value[down][currentColumn] == colorToCheck) {
 				matchCount_Down++;
 			}
@@ -230,7 +226,7 @@ class Board extends PIXI.Container {
 		}
 
 		// Check right
-		while (right < this.columnNum) {
+		while (right < GameDefine.COLUMN_NUM) {
 			if (this.arrBlocks_Value[currentRow][right] == colorToCheck) {
 				matchCount_Right++;
 			}
@@ -302,7 +298,7 @@ class Board extends PIXI.Container {
 		}
 
 		// Check down right
-		while (down < this.rowNum && right < this.columnNum) {
+		while (down < GameDefine.ROW_NUM && right < GameDefine.COLUMN_NUM) {
 			if (this.arrBlocks_Value[down][right] == colorToCheck) {
 				matchCount_DownRight++;
 			}
@@ -320,7 +316,7 @@ class Board extends PIXI.Container {
 		down = currentRow;
 		left = currentColumn;
 		right = currentColumn;
-		while (up >= 0 && right < this.columnNum) {
+		while (up >= 0 && right < GameDefine.COLUMN_NUM) {
 			if (this.arrBlocks_Value[up][right] == colorToCheck) {
 				matchCount_UpRight++;
 			}
@@ -332,7 +328,7 @@ class Board extends PIXI.Container {
 		}
 
 		// Check down left
-		while (down < this.rowNum && left >= 0) {
+		while (down < GameDefine.ROW_NUM && left >= 0) {
 			if (this.arrBlocks_Value[down][left] == colorToCheck) {
 				matchCount_DownLeft++;
 			}
@@ -400,7 +396,7 @@ class Board extends PIXI.Container {
 				sideToGo.push(distance / (Math.floor(distance / 10) + 1) / 10 + 1);
 			}
 		}
-		if (currentRow_A + 1 < this.rowNum) {
+		if (currentRow_A + 1 < GameDefine.ROW_NUM) {
 			if (this.arrBlocks_Path[currentRow_A + 1][currentColumn_A] == 0) {
 				const vectorAB_X = currentRow_B - (currentRow_A + 1);
 				const vectorAB_Y = currentColumn_B - (currentColumn_A);
@@ -416,7 +412,7 @@ class Board extends PIXI.Container {
 				sideToGo.push(distance / (Math.floor(distance / 10) + 1) / 10 + 3);
 			}
 		}
-		if (currentColumn_A + 1 < this.columnNum) {
+		if (currentColumn_A + 1 < GameDefine.COLUMN_NUM) {
 			if (this.arrBlocks_Path[currentRow_A][currentColumn_A + 1] == 0) {
 				const vectorAB_X = currentRow_B - (currentRow_A);
 				const vectorAB_Y = currentColumn_B - (currentColumn_A + 1);
@@ -483,8 +479,8 @@ class Board extends PIXI.Container {
 	}
 
 	recloneArrPath() {
-		for (var row = 0; row < this.rowNum; row++) {
-			for (var column = 0; column < this.columnNum; column++) {
+		for (var row = 0; row < GameDefine.ROW_NUM; row++) {
+			for (var column = 0; column < GameDefine.COLUMN_NUM; column++) {
 				this.arrBlocks_Path[row][column] = this.arrBlocks_Value[row][column] != 0;
 			}
 		}

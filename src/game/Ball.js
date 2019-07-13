@@ -26,8 +26,8 @@ class Ball extends PIXI.Sprite {
 
     onCLick() {
 		var board = this.parent.parent;
-		for (var row = 0; row < board.rowNum; row++) {
-			for (var column = 0; column < board.columnNum; column++) {
+		for (var row = 0; row < GameDefine.ROW_NUM; row++) {
+			for (var column = 0; column < GameDefine.COLUMN_NUM; column++) {
 				board.arrBlocks[row][column].tint = 0xffffff;
 			}
 		}

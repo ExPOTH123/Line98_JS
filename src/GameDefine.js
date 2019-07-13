@@ -2,7 +2,13 @@ class GameDefine
 {
 	constructor()
 	{
-		this.GAME_SPEED_BASE				= 60;
+		this.ROW_NUM = 10;
+		this.COLUMN_NUM = 10;
+
+		this.BALL_PER_SPAWN = 3;
+		this.STEPS_TO_SPAWN = 2; // ball will be
+
+		this.COLOR = [0xff0000, 0xbfff00, 0x0080ff];
 	}
 }
 module.exports = new GameDefine();
