@@ -173,7 +173,7 @@ class Board extends PIXI.Container {
 		isScore = isScore || this.checkPlus(block, isClean);
 		isScore = isScore || this.checkCross(block, isClean);
 
-		if (isScore) {
+		if (isScore) { // chosen block
 			this.arrBlocks_Value[currentRow][currentColumn] = 0;
 			this.ballsToDestroy.push(this.arrBlocks[currentRow][currentColumn].children[0])
 			this.arrBlocks[currentRow][currentColumn].children[0].playExplode();
@@ -413,7 +413,7 @@ class Board extends PIXI.Container {
 		this.arrBlocks[currentRow_A][currentColumn_A].tint = this.Color[0];
 
 		var sideToGo = [];
-		if (currentRow_A - 1 >= 0) {
+		if (currentRow_A - 1 >= 0) { // check up side
 			if (this.arrBlocks_Path[currentRow_A - 1][currentColumn_A] == 0) {
 				const vectorAB_X = currentRow_B - (currentRow_A - 1);
 				const vectorAB_Y = currentColumn_B - (currentColumn_A);
@@ -421,7 +421,7 @@ class Board extends PIXI.Container {
 				sideToGo.push(distance / (Math.floor(distance / 10) + 1) / 10 + 1);
 			}
 		}
-		if (currentRow_A + 1 < GameDefine.ROW_NUM) {
+		if (currentRow_A + 1 < GameDefine.ROW_NUM) { // check down side
 			if (this.arrBlocks_Path[currentRow_A + 1][currentColumn_A] == 0) {
 				const vectorAB_X = currentRow_B - (currentRow_A + 1);
 				const vectorAB_Y = currentColumn_B - (currentColumn_A);
@@ -429,7 +429,7 @@ class Board extends PIXI.Container {
 				sideToGo.push(distance / (Math.floor(distance / 10) + 1) / 10 + 2);
 			}
 		}
-		if (currentColumn_A - 1 >= 0) {
+		if (currentColumn_A - 1 >= 0) { // check left side
 			if (this.arrBlocks_Path[currentRow_A][currentColumn_A - 1] == 0) {
 				const vectorAB_X = currentRow_B - (currentRow_A);
 				const vectorAB_Y = currentColumn_B - (currentColumn_A - 1);
@@ -437,7 +437,7 @@ class Board extends PIXI.Container {
 				sideToGo.push(distance / (Math.floor(distance / 10) + 1) / 10 + 3);
 			}
 		}
-		if (currentColumn_A + 1 < GameDefine.COLUMN_NUM) {
+		if (currentColumn_A + 1 < GameDefine.COLUMN_NUM) { // check right side
 			if (this.arrBlocks_Path[currentRow_A][currentColumn_A + 1] == 0) {
 				const vectorAB_X = currentRow_B - (currentRow_A);
 				const vectorAB_Y = currentColumn_B - (currentColumn_A + 1);
@@ -454,7 +454,7 @@ class Board extends PIXI.Container {
 		for (var i = 0; i < numOfStep; i++) {
 			nextStep = Math.floor(sideToGo.pop());
 
-			if (nextStep == 1) {
+			if (nextStep == 1) { // up
 				if (this.arrBlocks_Path[currentRow_A - 1][currentColumn_A] == 0) {
 					this.arrBlocks_Path[currentRow_A - 1][currentColumn_A] = 1;
 					isCanFindPath = this.findPath(this.arrBlocks[currentRow_A - 1][currentColumn_A], B)
@@ -465,7 +465,7 @@ class Board extends PIXI.Container {
 					this.arrBlocks[currentRow_A - 1][currentColumn_A].tint = 0xffffff;
 				}
 			}
-			else if (nextStep == 2) {
+			else if (nextStep == 2) { // down
 				if (this.arrBlocks_Path[currentRow_A + 1][currentColumn_A] == 0) {
 					this.arrBlocks_Path[currentRow_A + 1][currentColumn_A] = 1;
 					isCanFindPath = this.findPath(this.arrBlocks[currentRow_A + 1][currentColumn_A], B)
@@ -476,7 +476,7 @@ class Board extends PIXI.Container {
 					this.arrBlocks[currentRow_A + 1][currentColumn_A].tint = 0xffffff;
 				}
 			}
-			else if (nextStep == 3) {
+			else if (nextStep == 3) { // left
 				if (this.arrBlocks_Path[currentRow_A][currentColumn_A - 1] == 0) {
 					this.arrBlocks_Path[currentRow_A][currentColumn_A - 1] = 1;
 					isCanFindPath = this.findPath(this.arrBlocks[currentRow_A][currentColumn_A - 1], B)
@@ -487,7 +487,7 @@ class Board extends PIXI.Container {
 					this.arrBlocks[currentRow_A][currentColumn_A - 1].tint = 0xffffff;
 				}
 			}
-			else if (nextStep == 4) {
+			else if (nextStep == 4) { // right
 				if (this.arrBlocks_Path[currentRow_A][currentColumn_A + 1] == 0) {
 					this.arrBlocks_Path[currentRow_A][currentColumn_A + 1] = 1;
 					isCanFindPath = this.findPath(this.arrBlocks[currentRow_A][currentColumn_A + 1], B)

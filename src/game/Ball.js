@@ -8,24 +8,18 @@ class Ball extends PIXI.extras.AnimatedSprite {
 		this.chosen_anim = [];
 		for (let i = 1; i <= 7; i++) {
 			const val = i <= 7 ? `${i}` : i;
-
-			// magically works since the spritesheet was loaded with the pixi loader
 			this.chosen_anim.push(PIXI.Texture.from(`data/image/ball/ball_chosen_${val}.png`));
 		}
 
 		this.explode_anim = [];
 		for (let i = 1; i <= 7; i++) {
 			const val = i <= 7 ? `${i}` : i;
-
-			// magically works since the spritesheet was loaded with the pixi loader
 			this.explode_anim.push(PIXI.Texture.from(`data/image/ball/ball_explode_${val}.png`));
 		}
 
 		this.spawn_anim = [];
 		for (let i = 1; i <= 5; i++) {
 			const val = i <= 5 ? `${i}` : i;
-
-			// magically works since the spritesheet was loaded with the pixi loader
 			this.spawn_anim.push(PIXI.Texture.from(`data/image/ball/ball_spawn_${val}.png`));
 		}
 

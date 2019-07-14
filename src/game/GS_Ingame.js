@@ -19,6 +19,7 @@ class GS_Ingame extends PIXI.Container {
     }
     
     Load() {
+        // Init board
         this.board = new Board();
         this.addChild(this.board); 
         this.board.load();
@@ -26,6 +27,7 @@ class GS_Ingame extends PIXI.Container {
         this.board.x = 0;
         this.board.y = (GameConfig.height - GameConfig.width) / 2;
 
+        // Init background
         this.bg = new PIXI.Sprite(this.texture_Bg);  
         this.addChildAt(this.bg, 0);
         this.bg.width = GameConfig.width;
@@ -45,6 +47,7 @@ class GS_Ingame extends PIXI.Container {
         this.retry_Button.interactive = true;
         this.retry_Button.on('mousedown', this.onRetryClick);
 
+        // Init back button
         this.back_Button = new PIXI.Sprite(this.texture_BackButton);  
         this.addChild(this.back_Button);
         this.back_Button.width = this.back_Button.height = GameConfig.width / 6;
