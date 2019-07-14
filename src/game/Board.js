@@ -5,7 +5,7 @@ class Board extends PIXI.Container {
 	constructor() {
 		super();
 
-		this.bunnyWidth = GameConfig.width / GameDefine.COLUMN_NUM;
+		this.bunnyWidth = GameConfig.width / GameDefine.COLUMN_NUM - GameDefine.OUT_LINE;
 		this.bunnyHeight = this.bunnyWidth;
 
 		this.arrBlocks = new Array(GameDefine.ROW_NUM);
@@ -39,8 +39,10 @@ class Board extends PIXI.Container {
 				block.anchor.set(0.5, 0.5);
 				block.width = this.bunnyWidth;
 				block.height = this.bunnyHeight;
-				block.x = column * block.width + block.width / 2;
-				block.y = row * block.height + block.height / 2;
+				block.x = column * block.width + block.width / 2 + (column + 1) * GameDefine.OUT_LINE;
+				block.y = row * block.height + block.height / 2 + row * GameDefine.OUT_LINE;
+				block.index_X = column;
+				block.index_Y = row;
 
 				// Pointers normalize touch and mouse
 				block.enableButton(true);
@@ -135,8 +137,8 @@ class Board extends PIXI.Container {
 				this.ballAboutToSpawn[i].enableButton(true);
 				this.ballAboutToSpawn[i].playSpawn();
 
-				const currentColumn = Math.floor(block.x / block.width);
-				const currentRow = Math.floor(block.y / block.height);
+				const currentColumn = block.index_X;
+				const currentRow = block.index_Y;
 				this.arrBlocks_Value[currentRow][currentColumn] = this.ballAboutToSpawn[i].color + 1;
 				this.checkBlockAt(block, true);
 			}
@@ -164,8 +166,8 @@ class Board extends PIXI.Container {
 	}
 
 	checkBlockAt(block, isClean) {
-		const currentColumn = Math.floor(block.x / block.width);
-		const currentRow = Math.floor(block.y / block.height);
+		const currentColumn = block.index_X;
+		const currentRow = block.index_Y;
 
 		var isScore = false;
 		isScore = isScore || this.checkPlus(block, isClean);
@@ -183,8 +185,8 @@ class Board extends PIXI.Container {
 
 	// Check +
 	checkPlus(block, isClean) {
-		const currentColumn = Math.floor(block.x / block.width);
-		const currentRow = Math.floor(block.y / block.height);
+		const currentColumn = block.index_X;
+		const currentRow = block.index_Y;
 
 		var colorToCheck = this.arrBlocks_Value[currentRow][currentColumn];
 
@@ -286,8 +288,8 @@ class Board extends PIXI.Container {
 
 	// Check X
 	checkCross(block, isClean) {
-		const currentColumn = Math.floor(block.x / block.width);
-		const currentRow = Math.floor(block.y / block.height);
+		const currentColumn = block.index_X;
+		const currentRow = block.index_Y;
 
 		var colorToCheck = this.arrBlocks_Value[currentRow][currentColumn];
 
@@ -396,10 +398,13 @@ class Board extends PIXI.Container {
 	}
 
 	findPath(A, B) {
-		const currentColumn_A = Math.floor(A.x / A.width);
-		const currentRow_A = Math.floor(A.y / A.height);
-		const currentColumn_B = Math.floor(B.x / B.width);
-		const currentRow_B = Math.floor(B.y / B.height);
+		const currentColumn_A = A.index_X;
+		const currentRow_A = A.index_Y;
+		const currentColumn_B = B.index_X;
+		const currentRow_B = B.index_Y;
+
+		console.log(currentRow_B + " " + currentColumn_B);
+
 		if (A == B) {
 			this.arrBlocks[currentRow_A][currentColumn_A].tint = this.Color[0];
 			return true;

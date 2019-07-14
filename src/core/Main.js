@@ -5,7 +5,7 @@ global.GameConfig	= require('../Config');
 global.Input		= require('./Input');
 global.StateManager	= require('./StateManager');
 global.APP			= require('./Application');
-global.StateSample	= require('../game/GS_Ingame');
+global.StateSample	= require('../game/GS_MainMenu');
 
 function GameLoop(deltaTime)
 {

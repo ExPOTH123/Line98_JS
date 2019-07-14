@@ -1,3 +1,5 @@
+const GameConfig = require('./Config');
+
 class GameDefine
 {
 	constructor()
@@ -7,6 +9,9 @@ class GameDefine
 
 		this.BALL_PER_SPAWN = 3;
 		this.STEPS_TO_SPAWN = 2; // ball will be
+
+		this.OUT_LINE = GameConfig.width / 200;
+		console.log(this.OUT_LINE);
 
 		this.COLOR = [0xff0000, 0xbfff00, 0x0080ff];
 	}

@@ -4,6 +4,9 @@ class Block extends PIXI.Sprite {
 	constructor() {
 		super();
 		this.texture = PIXI.Texture.from('data/image/bunny.png');
+
+		this.index_X;
+		this.index_Y;
 	}
 
 	enableEvent(event, callback) {
@@ -39,10 +42,10 @@ class Block extends PIXI.Sprite {
 		
 		var choosenBlock = board.choosenBlock;
 		choosenBlock.playSpawn();
-		const ballX = Math.floor(choosenBlock.parent.x / choosenBlock.parent.width);
-		const ballY = Math.floor(choosenBlock.parent.y / choosenBlock.parent.height);
-		const blockX = Math.floor(this.x / this.width);
-		const blockY = Math.floor(this.y / this.height);
+		const ballX = choosenBlock.parent.index_X;
+		const ballY = choosenBlock.parent.index_Y;
+		const blockX = this.index_X;
+		const blockY = this.index_Y;
 
 		if (choosenBlock != null) {
 			board.recloneArrPath();
