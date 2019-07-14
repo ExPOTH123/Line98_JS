@@ -17,6 +17,7 @@ class GS_Ingame extends PIXI.Container {
     }
 
     Update(deltaTime) {
+        this.board.Update();
     }
 }
 module.exports = new GS_Ingame();

@@ -15,6 +15,7 @@ class Board extends PIXI.Container {
 		this.ballAboutToSpawn = new Array(GameDefine.BALL_PER_SPAWN);
 		this.stepsCount = 0;
 		this.isCanSpawn = true;
+		this.ballsToDestroy = [];
 
 		this.timeToSpawn = 2;
 		this.timeCount = 0;
@@ -132,6 +133,7 @@ class Board extends PIXI.Container {
 				this.ballAboutToSpawn[i].width = this.bunnyWidth / 2;
 				this.ballAboutToSpawn[i].height = this.bunnyHeight / 2;
 				this.ballAboutToSpawn[i].enableButton(true);
+				this.ballAboutToSpawn[i].playSpawn();
 
 				const currentColumn = Math.floor(block.x / block.width);
 				const currentRow = Math.floor(block.y / block.height);
@@ -164,14 +166,16 @@ class Board extends PIXI.Container {
 	checkBlockAt(block, isClean) {
 		const currentColumn = Math.floor(block.x / block.width);
 		const currentRow = Math.floor(block.y / block.height);
-		
+
 		var isScore = false;
-		isScore = this.checkPlus(block, isClean);
-		isScore = this.checkCross(block, isClean);
+		isScore = isScore || this.checkPlus(block, isClean);
+		isScore = isScore || this.checkCross(block, isClean);
 
 		if (isScore) {
 			this.arrBlocks_Value[currentRow][currentColumn] = 0;
-			this.arrBlocks[currentRow][currentColumn].children[0].destroy();
+			this.ballsToDestroy.push(this.arrBlocks[currentRow][currentColumn].children[0])
+			this.arrBlocks[currentRow][currentColumn].children[0].playExplode();
+			this.arrBlocks[currentRow][currentColumn].children[0].enableButton(false);
 		}
 
 		return isScore;
@@ -241,12 +245,16 @@ class Board extends PIXI.Container {
 			if (matchCount_Up + matchCount_Down - 1 >= 5) {
 				for (var i = 1; i < matchCount_Up; i++) {
 					this.arrBlocks_Value[currentRow - i][currentColumn] = 0;
-					this.arrBlocks[currentRow - i][currentColumn].children[0].destroy();
+					this.ballsToDestroy.push(this.arrBlocks[currentRow - i][currentColumn].children[0])
+					this.arrBlocks[currentRow - i][currentColumn].children[0].playExplode();
+					this.arrBlocks[currentRow - i][currentColumn].children[0].enableButton(false);
 				}
 
 				for (var i = 1; i < matchCount_Down; i++) {
 					this.arrBlocks_Value[currentRow + i][currentColumn] = 0;
-					this.arrBlocks[currentRow + i][currentColumn].children[0].destroy();
+					this.ballsToDestroy.push(this.arrBlocks[currentRow + i][currentColumn].children[0])
+					this.arrBlocks[currentRow + i][currentColumn].children[0].playExplode();
+					this.arrBlocks[currentRow + i][currentColumn].children[0].enableButton(false);
 				}
 			}
 
@@ -254,12 +262,16 @@ class Board extends PIXI.Container {
 			if (matchCount_Left + matchCount_Right - 1 >= 5) {
 				for (var i = 1; i < matchCount_Left; i++) {
 					this.arrBlocks_Value[currentRow][currentColumn - i] = 0;
-					this.arrBlocks[currentRow][currentColumn - i].children[0].destroy();
+					this.ballsToDestroy.push(this.arrBlocks[currentRow][currentColumn - i].children[0])
+					this.arrBlocks[currentRow][currentColumn - i].children[0].playExplode();
+					this.arrBlocks[currentRow][currentColumn - i].children[0].enableButton(false);
 				}
 
 				for (var i = 1; i < matchCount_Right; i++) {
 					this.arrBlocks_Value[currentRow][currentColumn + i] = 0;
-					this.arrBlocks[currentRow][currentColumn + i].children[0].destroy();
+					this.ballsToDestroy.push(this.arrBlocks[currentRow][currentColumn + i].children[0])
+					this.arrBlocks[currentRow][currentColumn + i].children[0].playExplode();
+					this.arrBlocks[currentRow][currentColumn + i].children[0].enableButton(false);
 				}
 			}
 		}
@@ -344,12 +356,16 @@ class Board extends PIXI.Container {
 			if (matchCount_UpLeft + matchCount_DownRight - 1 >= 5) {
 				for (var i = 1; i < matchCount_UpLeft; i++) {
 					this.arrBlocks_Value[currentRow - i][currentColumn - i] = 0;
-					this.arrBlocks[currentRow - i][currentColumn - i].children[0].destroy();
+					this.ballsToDestroy.push(this.arrBlocks[currentRow - i][currentColumn - i].children[0])
+					this.arrBlocks[currentRow - i][currentColumn - i].children[0].playExplode();
+					this.arrBlocks[currentRow - i][currentColumn - i].children[0].enableButton(false);
 				}
 
 				for (var i = 1; i < matchCount_DownRight; i++) {
 					this.arrBlocks_Value[currentRow + i][currentColumn + i] = 0;
-					this.arrBlocks[currentRow + i][currentColumn + i].children[0].destroy();
+					this.ballsToDestroy.push(this.arrBlocks[currentRow + i][currentColumn + i].children[0])
+					this.arrBlocks[currentRow + i][currentColumn + i].children[0].playExplode();
+					this.arrBlocks[currentRow + i][currentColumn + i].children[0].enableButton(false);
 				}
 			}
 
@@ -357,12 +373,16 @@ class Board extends PIXI.Container {
 			if (matchCount_UpRight + matchCount_DownLeft - 1 >= 5) {
 				for (var i = 1; i < matchCount_UpRight; i++) {
 					this.arrBlocks_Value[currentRow - i][currentColumn + i] = 0;
-					this.arrBlocks[currentRow - i][currentColumn + i].children[0].destroy();
+					this.ballsToDestroy.push(this.arrBlocks[currentRow - i][currentColumn + i].children[0])
+					this.arrBlocks[currentRow - i][currentColumn + i].children[0].playExplode();
+					this.arrBlocks[currentRow - i][currentColumn + i].children[0].enableButton(false);
 				}
 
 				for (var i = 1; i < matchCount_DownLeft; i++) {
 					this.arrBlocks_Value[currentRow + i][currentColumn - i] = 0;
-					this.arrBlocks[currentRow + i][currentColumn - i].children[0].destroy();
+					this.ballsToDestroy.push(this.arrBlocks[currentRow + i][currentColumn - i].children[0])
+					this.arrBlocks[currentRow + i][currentColumn - i].children[0].playExplode();
+					this.arrBlocks[currentRow + i][currentColumn - i].children[0].enableButton(false);
 				}
 			}
 		}
@@ -482,6 +502,15 @@ class Board extends PIXI.Container {
 		for (var row = 0; row < GameDefine.ROW_NUM; row++) {
 			for (var column = 0; column < GameDefine.COLUMN_NUM; column++) {
 				this.arrBlocks_Path[row][column] = this.arrBlocks_Value[row][column] != 0;
+			}
+		}
+	}
+
+	Update(deltaTime) {
+		if(this.ballsToDestroy.length) {
+			if(this.ballsToDestroy[this.ballsToDestroy.length - 1].playing == false) {
+				var last = this.ballsToDestroy.pop();
+				last.destroy();
 			}
 		}
 	}

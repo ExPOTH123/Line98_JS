@@ -38,6 +38,7 @@ class Block extends PIXI.Sprite {
 		}
 		
 		var choosenBlock = board.choosenBlock;
+		choosenBlock.playSpawn();
 		const ballX = Math.floor(choosenBlock.parent.x / choosenBlock.parent.width);
 		const ballY = Math.floor(choosenBlock.parent.y / choosenBlock.parent.height);
 		const blockX = Math.floor(this.x / this.width);
@@ -47,7 +48,6 @@ class Block extends PIXI.Sprite {
 			board.recloneArrPath();
 		if (choosenBlock.parent != this && board.findPath(choosenBlock.parent, this)) {
 				board.recloneArrPath(board.arrBlocks_Value);
-				console.log(board.arrBlocks_Value);
 				board.arrBlocks_Value[blockY][blockX] = board.arrBlocks_Value[ballY][ballX];
 				board.arrBlocks_Value[ballY][ballX] = 0;
 				board.choosenBlock.scale.x = board.choosenBlock.scale.x / board.choosenBlock.scaleWhenChosen;
