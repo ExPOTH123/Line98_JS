@@ -156,7 +156,6 @@ class Board extends PIXI.Container {
 	spawnBall(block, color) {
 		let ball = new Ball();
 		ball.anchor.set(0.5, 0.5);
-		ball.color = color
 		ball.tint = color;
 
 		ball.enableButton(true);

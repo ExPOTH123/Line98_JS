@@ -74,6 +74,7 @@ class GS_Ingame extends PIXI.Container {
     }
 
     Unload() {
+        console.log("asdfihgdsfkjsdgh");
         this.removeChildren();
     }
 

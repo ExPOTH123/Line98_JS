@@ -71,7 +71,9 @@ class Ball extends PIXI.extras.AnimatedSprite {
 		this.animationSpeed = 0.4;
 		this.loop = false;
 		this.play();
-		this.onComplete = function() { this.playIdle(); };
+		this.onComplete = function() {
+			this.texture = this.idle_anim[0];
+		};
 	}
 
 	onCLick() {
