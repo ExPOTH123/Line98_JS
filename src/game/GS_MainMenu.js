@@ -9,7 +9,6 @@ class GS_MainMenu extends PIXI.Container {
 
         this.texture_Bg = PIXI.Texture.from('data/image/background.png');
         this.bg = null;
-
         APP.addChild(this);
     }
     
@@ -32,6 +31,8 @@ class GS_MainMenu extends PIXI.Container {
         this.bg.y = GameConfig.height/ 2;
         this.bg.anchor.set(0.5);
         this.addChildAt(this.bg, 0);
+
+        this.x = (APP.renderer.width - GameConfig.width) / 2;
     }
 
     onPlayClick() {

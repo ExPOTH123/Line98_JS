@@ -18,8 +18,8 @@ class Ball extends PIXI.extras.AnimatedSprite {
 		}
 
 		this.spawn_anim = [];
-		for (let i = 1; i <= 5; i++) {
-			const val = i <= 5 ? `${i}` : i;
+		for (let i = 1; i <= 6; i++) {
+			const val = i <= 6 ? `${i}` : i;
 			this.spawn_anim.push(PIXI.Texture.from(`data/image/ball/ball_spawn_${val}.png`));
 		}
 
@@ -53,8 +53,10 @@ class Ball extends PIXI.extras.AnimatedSprite {
 
 	playExplode() {
 		this.textures = this.explode_anim;
+		this.animationSpeed = 0.2;
 		this.loop = false;
 		this.play();
+		this.onComplete = function() { this.destroy(); };
 	}
 
 	playChosen() {
@@ -69,26 +71,29 @@ class Ball extends PIXI.extras.AnimatedSprite {
 		this.animationSpeed = 0.4;
 		this.loop = false;
 		this.play();
+		this.onComplete = function() { this.playIdle(); };
 	}
 
 	onCLick() {
 		this.playChosen();
-		var board = this.parent.parent;
-		for (var row = 0; row < GameDefine.ROW_NUM; row++) {
-			for (var column = 0; column < GameDefine.COLUMN_NUM; column++) {
+		let board = this.parent.parent;
+		for (let row = 0; row < GameDefine.ROW_NUM; row++) {
+			for (let column = 0; column < GameDefine.COLUMN_NUM; column++) {
 				board.arrBlocks[row][column].tint = 0xffffff;
 			}
 		}
 
 		if (board.choosenBlock != null) {
+			board.choosenBlock.playIdle();
+			board.choosenBlock.scale.x = board.choosenBlock.scale.x / this.scaleWhenChosen;
+			board.choosenBlock.scale.y = board.choosenBlock.scale.y / this.scaleWhenChosen;
+			board.choosenBlock.scale.x = board.choosenBlock.scale.x * this.scaleWhenChosen;
+			board.choosenBlock.scale.y = board.choosenBlock.scale.y * this.scaleWhenChosen;
 			if (board.choosenBlock != this) {
-				board.choosenBlock.playIdle();
-				board.choosenBlock.scale.x = board.choosenBlock.scale.x / this.scaleWhenChosen;
-				board.choosenBlock.scale.y = board.choosenBlock.scale.y / this.scaleWhenChosen;
-
 				board.choosenBlock = this;
-				board.choosenBlock.scale.x = board.choosenBlock.scale.x * this.scaleWhenChosen;
-				board.choosenBlock.scale.y = board.choosenBlock.scale.y * this.scaleWhenChosen;
+			}
+			else {
+				board.choosenBlock = null;
 			}
 		}
 		else {

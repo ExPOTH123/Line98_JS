@@ -15,11 +15,9 @@ class Board extends PIXI.Container {
 		this.ballAboutToSpawn = new Array(GameDefine.BALL_PER_SPAWN);
 		this.stepsCount = 0;
 		this.isCanSpawn = true;
-		this.ballsToDestroy = [];
 
 		this.timeToSpawn = 2;
 		this.timeCount = 0;
-		this.Color = [0xff0000, 0xbfff00, 0x0080ff];
 		this.choosenBlock = null;
 
 		this.isGameOver = false;
@@ -66,25 +64,25 @@ class Board extends PIXI.Container {
 			this.isCanSpawn = false;
 			const maxBlockNum = GameDefine.ROW_NUM * GameDefine.COLUMN_NUM;
 
-			var indexToSpawn = new Array(GameDefine.BALL_PER_SPAWN);
+			let indexToSpawn = new Array(GameDefine.BALL_PER_SPAWN);
 
 			// Random index
-			for (var i = 0; i < indexToSpawn.length; i++) {
+			for (let i = 0; i < indexToSpawn.length; i++) {
 				indexToSpawn[i] = Math.random() * (maxBlockNum - 1); // 0-99
 				indexToSpawn[i] = Math.round(indexToSpawn[i]); // 0-99
 
 				// Normalize the random
-				for (var j = 0; j < indexToSpawn.length; j++) {
+				for (let j = 0; j < indexToSpawn.length; j++) {
 					if (i != j && indexToSpawn[i] == indexToSpawn[j]) {
 						indexToSpawn[j]++;
 					}
 				}
 
 				// Spawn
-				var realIndex_Row = Math.floor(indexToSpawn[i] / GameDefine.COLUMN_NUM);
-				var realIndex_Columns = Math.floor(indexToSpawn[i] % GameDefine.COLUMN_NUM);
-				var failCount = 0;
-				while (this.arrBlocks_Value[realIndex_Row][realIndex_Columns] != 0) {
+				let realIndex_Row = Math.floor(indexToSpawn[i] / GameDefine.COLUMN_NUM);
+				let realIndex_Columns = Math.floor(indexToSpawn[i] % GameDefine.COLUMN_NUM);
+				let failCount = 0;
+				while (this.arrBlocks[realIndex_Row][realIndex_Columns].children.length) {
 					indexToSpawn[i]++;
 					if (indexToSpawn[i] >= maxBlockNum) {
 						failCount++;
@@ -98,14 +96,14 @@ class Board extends PIXI.Container {
 					realIndex_Columns = Math.floor(indexToSpawn[i] % GameDefine.COLUMN_NUM);
 				}
 
-				var colorIndex = this.randomColor(); // Random color
-				var block = this.arrBlocks[realIndex_Row][realIndex_Columns];
-				var newBall = this.spawnBall(block, this.Color[colorIndex]);
+				let colorIndex = this.randomColor(); // Random color
+				let block = this.arrBlocks[realIndex_Row][realIndex_Columns];
+				let newBall = this.spawnBall(block, GameDefine.COLOR[colorIndex]);
 
 				// Set new ball to suspend mode
 				if (this.isStartGame) {
-					newBall.width = block.width / 4;
-					newBall.height = block.height / 4;
+					newBall.scale.x = 0.3;
+					newBall.scale.y = 0.3;
 					newBall.enableButton(false);
 				}
 				else { // If it's first spawn
@@ -129,34 +127,36 @@ class Board extends PIXI.Container {
 
 	enableSuspendedBall() {
 		this.stepsCount = 0;
-		for (var i = 0; i < GameDefine.BALL_PER_SPAWN; i++) {
-			var block = this.ballAboutToSpawn[i].parent;
-			if (block) {
-				this.ballAboutToSpawn[i].width = this.bunnyWidth / 2;
-				this.ballAboutToSpawn[i].height = this.bunnyHeight / 2;
-				this.ballAboutToSpawn[i].enableButton(true);
-				this.ballAboutToSpawn[i].playSpawn();
+		for (let i = 0; i < GameDefine.BALL_PER_SPAWN; i++) {
+			if (this.ballAboutToSpawn[i]) {
+				let block = this.ballAboutToSpawn[i].parent;
+				if (block) {
+					this.ballAboutToSpawn[i].scale.x = 1;
+					this.ballAboutToSpawn[i].scale.y = 1;
+					this.ballAboutToSpawn[i].enableButton(true);
+					this.ballAboutToSpawn[i].playSpawn();
 
-				const currentColumn = block.index_X;
-				const currentRow = block.index_Y;
-				this.arrBlocks_Value[currentRow][currentColumn] = this.ballAboutToSpawn[i].color + 1;
-				this.checkBlockAt(block, true);
+					const currentColumn = block.index_X;
+					const currentRow = block.index_Y;
+					this.arrBlocks_Value[currentRow][currentColumn] = this.ballAboutToSpawn[i].color + 1;
+					this.checkBlockAt(block, true);
+					this.ballAboutToSpawn[i] = null;
+				}
 			}
 		}
 		this.isCanSpawn = true;
 	}
 
 	randomColor() {
-		var result = Math.floor(Math.random() * (Object.keys(this.Color).length));
+		let result = Math.floor(Math.random() * (Object.keys(GameDefine.COLOR).length));
 
 		return result;
 	}
 
 	spawnBall(block, color) {
-		var ball = new Ball();
+		let ball = new Ball();
 		ball.anchor.set(0.5, 0.5);
-		ball.width = block.width / 2;
-		ball.height = block.height / 2;
+		ball.color = color
 		ball.tint = color;
 
 		ball.enableButton(true);
@@ -169,13 +169,12 @@ class Board extends PIXI.Container {
 		const currentColumn = block.index_X;
 		const currentRow = block.index_Y;
 
-		var isScore = false;
-		isScore = isScore || this.checkPlus(block, isClean);
-		isScore = isScore || this.checkCross(block, isClean);
+		let isScore = false;
+		isScore = this.checkPlus(block, isClean) || isScore;
+		isScore = this.checkCross(block, isClean) || isScore;
 
 		if (isScore) { // chosen block
 			this.arrBlocks_Value[currentRow][currentColumn] = 0;
-			this.ballsToDestroy.push(this.arrBlocks[currentRow][currentColumn].children[0])
 			this.arrBlocks[currentRow][currentColumn].children[0].playExplode();
 			this.arrBlocks[currentRow][currentColumn].children[0].enableButton(false);
 		}
@@ -184,17 +183,15 @@ class Board extends PIXI.Container {
 	}
 
 	// Check +
-	checkPlus(block, isClean) {
+	checkPlus(block, isClean, isCross) {
 		const currentColumn = block.index_X;
 		const currentRow = block.index_Y;
 
-		var colorToCheck = this.arrBlocks_Value[currentRow][currentColumn];
+		let colorToCheck = this.arrBlocks_Value[currentRow][currentColumn];
 
 		// Check up
-		var matchCount_Up = 0;
-		var matchCount_Down = 0;
-		var up = currentRow;
-		var down = currentRow;
+		let matchCount_Up = 0;
+		let up = currentRow;
 		while (up >= 0) {
 			if (this.arrBlocks_Value[up][currentColumn] == colorToCheck) {
 				matchCount_Up++;
@@ -206,6 +203,8 @@ class Board extends PIXI.Container {
 		}
 
 		// Check up
+		let matchCount_Down = 0;
+		let down = currentRow;
 		while (down < GameDefine.ROW_NUM) {
 			if (this.arrBlocks_Value[down][currentColumn] == colorToCheck) {
 				matchCount_Down++;
@@ -217,10 +216,8 @@ class Board extends PIXI.Container {
 		}
 
 		// Check left
-		var matchCount_Left = 0;
-		var matchCount_Right = 0;
-		var left = currentColumn;
-		var right = currentColumn;
+		let matchCount_Left = 0;
+		let left = currentColumn;
 		while (left >= 0) {
 			if (this.arrBlocks_Value[currentRow][left] == colorToCheck) {
 				matchCount_Left++;
@@ -232,6 +229,8 @@ class Board extends PIXI.Container {
 		}
 
 		// Check right
+		let matchCount_Right = 0;
+		let right = currentColumn;
 		while (right < GameDefine.COLUMN_NUM) {
 			if (this.arrBlocks_Value[currentRow][right] == colorToCheck) {
 				matchCount_Right++;
@@ -245,35 +244,23 @@ class Board extends PIXI.Container {
 		if (isClean) {
 			// Clean if >= 5 matches
 			if (matchCount_Up + matchCount_Down - 1 >= 5) {
-				for (var i = 1; i < matchCount_Up; i++) {
-					this.arrBlocks_Value[currentRow - i][currentColumn] = 0;
-					this.ballsToDestroy.push(this.arrBlocks[currentRow - i][currentColumn].children[0])
-					this.arrBlocks[currentRow - i][currentColumn].children[0].playExplode();
-					this.arrBlocks[currentRow - i][currentColumn].children[0].enableButton(false);
+				for (let i = 1; i < matchCount_Up; i++) {
+					this.explodeBall(currentRow - i, currentColumn);
 				}
 
-				for (var i = 1; i < matchCount_Down; i++) {
-					this.arrBlocks_Value[currentRow + i][currentColumn] = 0;
-					this.ballsToDestroy.push(this.arrBlocks[currentRow + i][currentColumn].children[0])
-					this.arrBlocks[currentRow + i][currentColumn].children[0].playExplode();
-					this.arrBlocks[currentRow + i][currentColumn].children[0].enableButton(false);
+				for (let i = 1; i < matchCount_Down; i++) {
+					this.explodeBall(currentRow + i, currentColumn);
 				}
 			}
 
 			// Clean if >= 5 matches
 			if (matchCount_Left + matchCount_Right - 1 >= 5) {
-				for (var i = 1; i < matchCount_Left; i++) {
-					this.arrBlocks_Value[currentRow][currentColumn - i] = 0;
-					this.ballsToDestroy.push(this.arrBlocks[currentRow][currentColumn - i].children[0])
-					this.arrBlocks[currentRow][currentColumn - i].children[0].playExplode();
-					this.arrBlocks[currentRow][currentColumn - i].children[0].enableButton(false);
+				for (let i = 1; i < matchCount_Left; i++) {
+					this.explodeBall(currentRow, currentColumn - i);
 				}
 
-				for (var i = 1; i < matchCount_Right; i++) {
-					this.arrBlocks_Value[currentRow][currentColumn + i] = 0;
-					this.ballsToDestroy.push(this.arrBlocks[currentRow][currentColumn + i].children[0])
-					this.arrBlocks[currentRow][currentColumn + i].children[0].playExplode();
-					this.arrBlocks[currentRow][currentColumn + i].children[0].enableButton(false);
+				for (let i = 1; i < matchCount_Right; i++) {
+					this.explodeBall(currentRow, currentColumn + i);
 				}
 			}
 		}
@@ -291,15 +278,12 @@ class Board extends PIXI.Container {
 		const currentColumn = block.index_X;
 		const currentRow = block.index_Y;
 
-		var colorToCheck = this.arrBlocks_Value[currentRow][currentColumn];
+		let colorToCheck = this.arrBlocks_Value[currentRow][currentColumn];
 
-		var matchCount_UpLeft = 0;
-		var matchCount_DownRight = 0;
-		var up = currentRow;
-		var down = currentRow;
-		var left = currentColumn;
-		var right = currentColumn;
 		// Check up left
+		let matchCount_UpLeft = 0;
+		let up = currentRow;
+		let left = currentColumn;
 		while (up >= 0 && left >= 0) {
 			if (this.arrBlocks_Value[up][left] == colorToCheck) {
 				matchCount_UpLeft++;
@@ -312,6 +296,9 @@ class Board extends PIXI.Container {
 		}
 
 		// Check down right
+		let matchCount_DownRight = 0;
+		let down = currentRow;
+		let right = currentColumn;
 		while (down < GameDefine.ROW_NUM && right < GameDefine.COLUMN_NUM) {
 			if (this.arrBlocks_Value[down][right] == colorToCheck) {
 				matchCount_DownRight++;
@@ -324,11 +311,8 @@ class Board extends PIXI.Container {
 		}
 
 		// Check up down
-		var matchCount_UpRight = 0;
-		var matchCount_DownLeft = 0;
+		let matchCount_UpRight = 0;
 		up = currentRow;
-		down = currentRow;
-		left = currentColumn;
 		right = currentColumn;
 		while (up >= 0 && right < GameDefine.COLUMN_NUM) {
 			if (this.arrBlocks_Value[up][right] == colorToCheck) {
@@ -342,6 +326,9 @@ class Board extends PIXI.Container {
 		}
 
 		// Check down left
+		let matchCount_DownLeft = 0;
+		down = currentRow;
+		left = currentColumn;
 		while (down < GameDefine.ROW_NUM && left >= 0) {
 			if (this.arrBlocks_Value[down][left] == colorToCheck) {
 				matchCount_DownLeft++;
@@ -356,35 +343,23 @@ class Board extends PIXI.Container {
 		if (isClean) {
 			// Clean if >= 5 matches
 			if (matchCount_UpLeft + matchCount_DownRight - 1 >= 5) {
-				for (var i = 1; i < matchCount_UpLeft; i++) {
-					this.arrBlocks_Value[currentRow - i][currentColumn - i] = 0;
-					this.ballsToDestroy.push(this.arrBlocks[currentRow - i][currentColumn - i].children[0])
-					this.arrBlocks[currentRow - i][currentColumn - i].children[0].playExplode();
-					this.arrBlocks[currentRow - i][currentColumn - i].children[0].enableButton(false);
+				for (let i = 1; i < matchCount_UpLeft; i++) {
+					this.explodeBall(currentRow - i, currentColumn - i);
 				}
 
-				for (var i = 1; i < matchCount_DownRight; i++) {
-					this.arrBlocks_Value[currentRow + i][currentColumn + i] = 0;
-					this.ballsToDestroy.push(this.arrBlocks[currentRow + i][currentColumn + i].children[0])
-					this.arrBlocks[currentRow + i][currentColumn + i].children[0].playExplode();
-					this.arrBlocks[currentRow + i][currentColumn + i].children[0].enableButton(false);
+				for (let i = 1; i < matchCount_DownRight; i++) {
+					this.explodeBall(currentRow + i, currentColumn + i);
 				}
 			}
 
 			// Clean if >= 5 matches
 			if (matchCount_UpRight + matchCount_DownLeft - 1 >= 5) {
-				for (var i = 1; i < matchCount_UpRight; i++) {
-					this.arrBlocks_Value[currentRow - i][currentColumn + i] = 0;
-					this.ballsToDestroy.push(this.arrBlocks[currentRow - i][currentColumn + i].children[0])
-					this.arrBlocks[currentRow - i][currentColumn + i].children[0].playExplode();
-					this.arrBlocks[currentRow - i][currentColumn + i].children[0].enableButton(false);
+				for (let i = 1; i < matchCount_UpRight; i++) {
+					this.explodeBall(currentRow - i, currentColumn + i);
 				}
 
-				for (var i = 1; i < matchCount_DownLeft; i++) {
-					this.arrBlocks_Value[currentRow + i][currentColumn - i] = 0;
-					this.ballsToDestroy.push(this.arrBlocks[currentRow + i][currentColumn - i].children[0])
-					this.arrBlocks[currentRow + i][currentColumn - i].children[0].playExplode();
-					this.arrBlocks[currentRow + i][currentColumn - i].children[0].enableButton(false);
+				for (let i = 1; i < matchCount_DownLeft; i++) {
+					this.explodeBall(currentRow + i, currentColumn - i);
 				}
 			}
 		}
@@ -397,22 +372,26 @@ class Board extends PIXI.Container {
 		return false;
 	}
 
+	explodeBall(row, column) {
+		this.arrBlocks_Value[row][column] = 0;
+		this.arrBlocks[row][column].children[0].playExplode();
+		this.arrBlocks[row][column].children[0].enableButton(false);
+	}
+
 	findPath(A, B) {
 		const currentColumn_A = A.index_X;
 		const currentRow_A = A.index_Y;
 		const currentColumn_B = B.index_X;
 		const currentRow_B = B.index_Y;
 
-		console.log(currentRow_B + " " + currentColumn_B);
-
 		if (A == B) {
-			this.arrBlocks[currentRow_A][currentColumn_A].tint = this.Color[0];
+			this.arrBlocks[currentRow_A][currentColumn_A].tint = GameDefine.COLOR[0];
 			return true;
 		}
 
-		this.arrBlocks[currentRow_A][currentColumn_A].tint = this.Color[0];
+		this.arrBlocks[currentRow_A][currentColumn_A].tint = GameDefine.COLOR[0];
 
-		var sideToGo = [];
+		let sideToGo = [];
 		if (currentRow_A - 1 >= 0) { // check up side
 			if (this.arrBlocks_Path[currentRow_A - 1][currentColumn_A] == 0) {
 				const vectorAB_X = currentRow_B - (currentRow_A - 1);
@@ -448,10 +427,10 @@ class Board extends PIXI.Container {
 
 		sideToGo.sort(function (a, b) { return b % 1 - a % 1 });
 
-		var isCanFindPath = false;
-		var nextStep;
-		var numOfStep = sideToGo.length;
-		for (var i = 0; i < numOfStep; i++) {
+		let isCanFindPath = false;
+		let nextStep;
+		let numOfStep = sideToGo.length;
+		for (let i = 0; i < numOfStep; i++) {
 			nextStep = Math.floor(sideToGo.pop());
 
 			if (nextStep == 1) { // up
@@ -504,18 +483,9 @@ class Board extends PIXI.Container {
 	}
 
 	recloneArrPath() {
-		for (var row = 0; row < GameDefine.ROW_NUM; row++) {
-			for (var column = 0; column < GameDefine.COLUMN_NUM; column++) {
+		for (let row = 0; row < GameDefine.ROW_NUM; row++) {
+			for (let column = 0; column < GameDefine.COLUMN_NUM; column++) {
 				this.arrBlocks_Path[row][column] = this.arrBlocks_Value[row][column] != 0;
-			}
-		}
-	}
-
-	Update(deltaTime) {
-		if(this.ballsToDestroy.length) {
-			if(this.ballsToDestroy[this.ballsToDestroy.length - 1].playing == false) {
-				var last = this.ballsToDestroy.pop();
-				last.destroy();
 			}
 		}
 	}

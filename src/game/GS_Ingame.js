@@ -1,11 +1,11 @@
 import Board from "../game/Board.js";
 
 class GS_Ingame extends PIXI.Container {
-	constructor() {
+    constructor() {
         super();
-        
-        let board = null; 
-        
+
+        let board = null;
+
         this.texture_Bg = PIXI.Texture.from('data/image/background.png');
         this.bg = null;
 
@@ -15,29 +15,33 @@ class GS_Ingame extends PIXI.Container {
         this.texture_BackButton = PIXI.Texture.from('data/image/ui/backButton.png');
         this.back_Button = null;
 
+        this.time = 0.05;
+        this.timeCount = 0;
+
         APP.addChild(this);
     }
-    
+
     Load() {
         // Init board
         this.board = new Board();
-        this.addChild(this.board); 
+        this.addChild(this.board);
         this.board.load();
+        this.board.spawn();
         this.board.spawn();
         this.board.x = 0;
         this.board.y = (GameConfig.height - GameConfig.width) / 2;
 
         // Init background
-        this.bg = new PIXI.Sprite(this.texture_Bg);  
+        this.bg = new PIXI.Sprite(this.texture_Bg);
         this.addChildAt(this.bg, 0);
         this.bg.width = GameConfig.width;
         this.bg.height = GameConfig.height;
         this.bg.x = GameConfig.width / 2;
-        this.bg.y = GameConfig.height/ 2;
+        this.bg.y = GameConfig.height / 2;
         this.bg.anchor.set(0.5);
 
         // Init retry button
-        this.retry_Button = new PIXI.Sprite(this.texture_RetryButton);  
+        this.retry_Button = new PIXI.Sprite(this.texture_RetryButton);
         this.addChild(this.retry_Button);
         this.retry_Button.width = this.retry_Button.height = GameConfig.width / 6;
         this.retry_Button.x = GameConfig.width * 0.25;
@@ -48,7 +52,7 @@ class GS_Ingame extends PIXI.Container {
         this.retry_Button.on('mousedown', this.onRetryClick);
 
         // Init back button
-        this.back_Button = new PIXI.Sprite(this.texture_BackButton);  
+        this.back_Button = new PIXI.Sprite(this.texture_BackButton);
         this.addChild(this.back_Button);
         this.back_Button.width = this.back_Button.height = GameConfig.width / 6;
         this.back_Button.x = GameConfig.width * 0.75;
@@ -57,10 +61,16 @@ class GS_Ingame extends PIXI.Container {
         this.back_Button.buttonMode = true;
         this.back_Button.interactive = true;
         this.back_Button.on('mousedown', this.onBackClick);
+
+        this.x = (APP.renderer.width - GameConfig.width) / 2;
     }
 
     Update(deltaTime) {
-        this.board.Update();
+        // this.timeCount += deltaTime;
+        // if (this.timeCount >= this.time) {
+        //     this.board.spawn();
+        //     this.timeCount = 0;
+        // }
     }
 
     Unload() {
@@ -71,7 +81,7 @@ class GS_Ingame extends PIXI.Container {
         const GS_Ingame = require('../game/GS_Ingame');
         StateManager.SwitchState(GS_Ingame);
     }
-    
+
     onBackClick() {
         const GS_MainMenu = require('../game/GS_MainMenu');
         StateManager.SwitchState(GS_MainMenu);
