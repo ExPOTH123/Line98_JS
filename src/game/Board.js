@@ -105,6 +105,7 @@ class Board extends PIXI.Container {
 					newBall.scale.x = GameDefine.BALL_SIZE_ON_SUSPEND;
 					newBall.scale.y = GameDefine.BALL_SIZE_ON_SUSPEND;
 					newBall.enableButton(false);
+					this.ballAboutToSpawn[i] = newBall;
 				}
 				else { // If it's first spawn
 					this.isCanSpawn = true;
@@ -113,7 +114,6 @@ class Board extends PIXI.Container {
 				}
 
 				newBall.color = colorIndex;
-				this.ballAboutToSpawn[i] = newBall;
 			}
 		}
 		else {
@@ -144,6 +144,7 @@ class Board extends PIXI.Container {
 				}
 			}
 		}
+
 		this.isCanSpawn = true;
 	}
 
