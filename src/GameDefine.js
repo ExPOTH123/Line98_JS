@@ -5,7 +5,7 @@ class GameDefine
 	constructor()
 	{
 		this.ROW_NUM = 10;
-		this.COLUMN_NUM = 10;
+		this.COLUMN_NUM = this.ROW_NUM;
 
 		this.BALL_PER_SPAWN = 3;
 		this.STEPS_TO_SPAWN = 2; // ball will be
