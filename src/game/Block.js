@@ -65,6 +65,9 @@ class Block extends PIXI.Sprite {
 				let gamestate = require('./GS_Ingame');
 				gamestate.resetTimer();
 			}
+			else {
+				board.choosenBlock.playChosen();
+			}
 		}
 	}
 }

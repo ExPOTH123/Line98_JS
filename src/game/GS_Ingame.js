@@ -78,7 +78,6 @@ class GS_Ingame extends PIXI.Container {
         // Init score board
         this.scoreBoard = new ScoreBoard();
         this.addChild(this.scoreBoard);
-        // this.timeCounter.slider.setSize(GameConfig.width * 0.9, GameConfig.height * 0.01);
         this.scoreBoard.x = GameConfig.width / 2;
         this.scoreBoard.y = this.board.y  - this.scoreBoard.scoreText.style.fontSize - GameConfig.width * 0.05;
 
