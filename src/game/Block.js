@@ -3,7 +3,7 @@ import Board from "./Board";
 class Block extends PIXI.Sprite {
 	constructor() {
 		super();
-		this.texture = PIXI.Texture.from('data/image/bunny.png');
+		this.texture = PIXI.Texture.from('data/image/block.png');
 
 		this.index_X;
 		this.index_Y;
