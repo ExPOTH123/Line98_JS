@@ -102,8 +102,8 @@ class Board extends PIXI.Container {
 
 				// Set new ball to suspend mode
 				if (this.isStartGame) {
-					newBall.scale.x = 0.3;
-					newBall.scale.y = 0.3;
+					newBall.scale.x = GameDefine.BALL_SIZE_ON_SUSPEND;
+					newBall.scale.y = GameDefine.BALL_SIZE_ON_SUSPEND;
 					newBall.enableButton(false);
 				}
 				else { // If it's first spawn
@@ -266,6 +266,11 @@ class Board extends PIXI.Container {
 
 
 		if (matchCount_Left + matchCount_Right - 1 >= 5 || matchCount_Up + matchCount_Down - 1 >= 5) {
+			let gamestate = require('./GS_Ingame');
+			let score = 0;
+			score += (matchCount_Left + matchCount_Right - 1 >= 5)? matchCount_Left + matchCount_Right - 1 : 0;
+			score += (matchCount_Up + matchCount_Down - 1 >= 5)? matchCount_Up + matchCount_Down - 1 : 0;
+			gamestate.addScore(score);
 			return true;
 		}
 
@@ -365,6 +370,11 @@ class Board extends PIXI.Container {
 
 
 		if (matchCount_UpLeft + matchCount_DownRight - 1 >= 5 || matchCount_UpRight + matchCount_DownLeft - 1 >= 5) {
+			let gamestate = require('./GS_Ingame');
+			let score = 0;
+			score += (matchCount_UpLeft + matchCount_DownRight - 1 >= 5)? matchCount_UpLeft + matchCount_DownRight - 1 : 0;
+			score += (matchCount_UpRight + matchCount_DownLeft - 1 >= 5)? matchCount_UpRight + matchCount_DownLeft - 1 : 0;
+			gamestate.addScore(score);
 			return true;
 		}
 

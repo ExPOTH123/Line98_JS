@@ -1,4 +1,6 @@
 import Board from "../game/Board.js";
+import TimeCounter from "./TimeCounter.js";
+import ScoreBoard from "./ScoreBoard.js";
 
 class GS_Ingame extends PIXI.Container {
     constructor() {
@@ -14,6 +16,10 @@ class GS_Ingame extends PIXI.Container {
 
         this.texture_BackButton = PIXI.Texture.from('data/image/ui/backButton.png');
         this.back_Button = null;
+
+        this.timeCounter = null;
+
+        this.scoreBoard = null;
 
         this.time = 0.05;
         this.timeCount = 0;
@@ -62,10 +68,25 @@ class GS_Ingame extends PIXI.Container {
         this.back_Button.interactive = true;
         this.back_Button.on('mousedown', this.onBackClick);
 
+        // Init time counter
+        this.timeCounter = new TimeCounter();
+        this.addChild(this.timeCounter);
+        this.timeCounter.slider.setSize(GameConfig.width * 0.9, GameConfig.height * 0.01);
+        this.timeCounter.x = GameConfig.width / 2;
+        this.timeCounter.y = this.board.y + GameConfig.width * 1.05;
+
+        // Init score board
+        this.scoreBoard = new ScoreBoard();
+        this.addChild(this.scoreBoard);
+        // this.timeCounter.slider.setSize(GameConfig.width * 0.9, GameConfig.height * 0.01);
+        this.scoreBoard.x = GameConfig.width / 2;
+        this.scoreBoard.y = this.board.y  - this.scoreBoard.scoreText.style.fontSize - GameConfig.width * 0.05;
+
         this.x = (APP.renderer.width - GameConfig.width) / 2;
     }
 
     Update(deltaTime) {
+        this.timeCounter.Update(deltaTime);
         // this.timeCount += deltaTime;
         // if (this.timeCount >= this.time) {
         //     this.board.spawn();
@@ -73,8 +94,19 @@ class GS_Ingame extends PIXI.Container {
         // }
     }
 
+    resetTimer() {
+        this.timeCounter.resetTime();
+    }
+
+    spawnBall() {
+        this.board.spawn();
+    }
+
+    addScore(score) {
+        this.scoreBoard.addScore(score);
+    }
+
     Unload() {
-        console.log("asdfihgdsfkjsdgh");
         this.removeChildren();
     }
 

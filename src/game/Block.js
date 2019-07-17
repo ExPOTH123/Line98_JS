@@ -61,6 +61,9 @@ class Block extends PIXI.Sprite {
 				board.checkBlockAt(this, true);
 
 				board.spawn();
+
+				let gamestate = require('./GS_Ingame');
+				gamestate.resetTimer();
 			}
 		}
 	}
