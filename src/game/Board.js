@@ -22,6 +22,7 @@ class Board extends PIXI.Container {
 
 		this.isGameOver = false;
 		this.isStartGame = false;
+		this.canClick = true;
 	}
 
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -101,17 +102,11 @@ class Board extends PIXI.Container {
 				let newBall = this.spawnBall(block, GameDefine.COLOR[colorIndex]);
 
 				// Set new ball to suspend mode
-				if (this.isStartGame) {
 					newBall.scale.x = GameDefine.BALL_SIZE_ON_SUSPEND;
 					newBall.scale.y = GameDefine.BALL_SIZE_ON_SUSPEND;
 					newBall.enableButton(false);
 					this.ballAboutToSpawn[i] = newBall;
-				}
-				else { // If it's first spawn
-					this.isCanSpawn = true;
-					this.stepsCount = 0;
-					this.arrBlocks_Value[realIndex_Row][realIndex_Columns] = colorIndex + 1;
-				}
+				
 
 				newBall.color = colorIndex;
 			}
@@ -133,6 +128,7 @@ class Board extends PIXI.Container {
 				if (block) {
 					this.ballAboutToSpawn[i].scale.x = 1;
 					this.ballAboutToSpawn[i].scale.y = 1;
+					this.ballAboutToSpawn[i].isSuspend = false;
 					this.ballAboutToSpawn[i].enableButton(true);
 					this.ballAboutToSpawn[i].playSpawn();
 
@@ -182,6 +178,34 @@ class Board extends PIXI.Container {
 		return isScore;
 	}
 
+	countWithDirection(isUp, isDown, isLeft, isRight, currentRow, currentColumn, color) {
+		let count = 0;
+		let up = 0;
+		let down = 0;
+		let left = 0;
+		let right = 0;
+		while (true) {
+			const row = up * isUp + down * isDown + currentRow;
+			const column = left * isLeft + right * isRight + currentColumn;
+			if (row < 0 || row >= GameDefine.ROW_NUM || column < 0 || column >= GameDefine.COLUMN_NUM) {
+				break;
+			}
+
+			if (this.arrBlocks_Value[row][column] == color) {
+				count++;
+			}
+			else {
+				break;
+			}
+			up--;
+			down++;
+			left--;
+			right++;
+		}
+
+		return count;
+	}
+
 	// Check +
 	checkPlus(block, isClean, isCross) {
 		const currentColumn = block.index_X;
@@ -189,57 +213,10 @@ class Board extends PIXI.Container {
 
 		let colorToCheck = this.arrBlocks_Value[currentRow][currentColumn];
 
-		// Check up
-		let matchCount_Up = 0;
-		let up = currentRow;
-		while (up >= 0) {
-			if (this.arrBlocks_Value[up][currentColumn] == colorToCheck) {
-				matchCount_Up++;
-			}
-			else {
-				break;
-			}
-			up--;
-		}
-
-		// Check up
-		let matchCount_Down = 0;
-		let down = currentRow;
-		while (down < GameDefine.ROW_NUM) {
-			if (this.arrBlocks_Value[down][currentColumn] == colorToCheck) {
-				matchCount_Down++;
-			}
-			else {
-				break;
-			}
-			down++;
-		}
-
-		// Check left
-		let matchCount_Left = 0;
-		let left = currentColumn;
-		while (left >= 0) {
-			if (this.arrBlocks_Value[currentRow][left] == colorToCheck) {
-				matchCount_Left++;
-			}
-			else {
-				break;
-			}
-			left--;
-		}
-
-		// Check right
-		let matchCount_Right = 0;
-		let right = currentColumn;
-		while (right < GameDefine.COLUMN_NUM) {
-			if (this.arrBlocks_Value[currentRow][right] == colorToCheck) {
-				matchCount_Right++;
-			}
-			else {
-				break;
-			}
-			right++;
-		}
+		let matchCount_Up = this.countWithDirection(1, 0, 0, 0, currentRow, currentColumn, colorToCheck);
+		let matchCount_Down = this.countWithDirection(0, 1, 0, 0, currentRow, currentColumn, colorToCheck);
+		let matchCount_Left = this.countWithDirection(0, 0, 1, 0, currentRow, currentColumn, colorToCheck);
+		let matchCount_Right = this.countWithDirection(0, 0, 0, 1, currentRow, currentColumn, colorToCheck);
 
 		if (isClean) {
 			// Clean if >= 5 matches
@@ -269,8 +246,8 @@ class Board extends PIXI.Container {
 		if (matchCount_Left + matchCount_Right - 1 >= 5 || matchCount_Up + matchCount_Down - 1 >= 5) {
 			let gamestate = require('./GS_Ingame');
 			let score = 0;
-			score += (matchCount_Left + matchCount_Right - 1 >= 5)? matchCount_Left + matchCount_Right - 1 : 0;
-			score += (matchCount_Up + matchCount_Down - 1 >= 5)? matchCount_Up + matchCount_Down - 1 : 0;
+			score += (matchCount_Left + matchCount_Right - 1 >= 5) ? matchCount_Left + matchCount_Right - 1 : 0;
+			score += (matchCount_Up + matchCount_Down - 1 >= 5) ? matchCount_Up + matchCount_Down - 1 : 0;
 			gamestate.addScore(score);
 			return true;
 		}
@@ -285,65 +262,10 @@ class Board extends PIXI.Container {
 
 		let colorToCheck = this.arrBlocks_Value[currentRow][currentColumn];
 
-		// Check up left
-		let matchCount_UpLeft = 0;
-		let up = currentRow;
-		let left = currentColumn;
-		while (up >= 0 && left >= 0) {
-			if (this.arrBlocks_Value[up][left] == colorToCheck) {
-				matchCount_UpLeft++;
-			}
-			else {
-				break;
-			}
-			up--;
-			left--;
-		}
-
-		// Check down right
-		let matchCount_DownRight = 0;
-		let down = currentRow;
-		let right = currentColumn;
-		while (down < GameDefine.ROW_NUM && right < GameDefine.COLUMN_NUM) {
-			if (this.arrBlocks_Value[down][right] == colorToCheck) {
-				matchCount_DownRight++;
-			}
-			else {
-				break;
-			}
-			down++;
-			right++;
-		}
-
-		// Check up down
-		let matchCount_UpRight = 0;
-		up = currentRow;
-		right = currentColumn;
-		while (up >= 0 && right < GameDefine.COLUMN_NUM) {
-			if (this.arrBlocks_Value[up][right] == colorToCheck) {
-				matchCount_UpRight++;
-			}
-			else {
-				break;
-			}
-			up--;
-			right++;
-		}
-
-		// Check down left
-		let matchCount_DownLeft = 0;
-		down = currentRow;
-		left = currentColumn;
-		while (down < GameDefine.ROW_NUM && left >= 0) {
-			if (this.arrBlocks_Value[down][left] == colorToCheck) {
-				matchCount_DownLeft++;
-			}
-			else {
-				break;
-			}
-			down++;
-			left--;
-		}
+		let matchCount_UpLeft = this.countWithDirection(1, 0, 1, 0, currentRow, currentColumn, colorToCheck);
+		let matchCount_DownRight = this.countWithDirection(0, 1, 0, 1, currentRow, currentColumn, colorToCheck);
+		let matchCount_UpRight = this.countWithDirection(1, 0, 0, 1, currentRow, currentColumn, colorToCheck);
+		let matchCount_DownLeft = this.countWithDirection(0, 1, 1, 0, currentRow, currentColumn, colorToCheck);
 
 		if (isClean) {
 			// Clean if >= 5 matches
@@ -373,8 +295,8 @@ class Board extends PIXI.Container {
 		if (matchCount_UpLeft + matchCount_DownRight - 1 >= 5 || matchCount_UpRight + matchCount_DownLeft - 1 >= 5) {
 			let gamestate = require('./GS_Ingame');
 			let score = 0;
-			score += (matchCount_UpLeft + matchCount_DownRight - 1 >= 5)? matchCount_UpLeft + matchCount_DownRight - 1 : 0;
-			score += (matchCount_UpRight + matchCount_DownLeft - 1 >= 5)? matchCount_UpRight + matchCount_DownLeft - 1 : 0;
+			score += (matchCount_UpLeft + matchCount_DownRight - 1 >= 5) ? matchCount_UpLeft + matchCount_DownRight - 1 : 0;
+			score += (matchCount_UpRight + matchCount_DownLeft - 1 >= 5) ? matchCount_UpRight + matchCount_DownLeft - 1 : 0;
 			gamestate.addScore(score);
 			return true;
 		}
@@ -388,6 +310,30 @@ class Board extends PIXI.Container {
 		this.arrBlocks[row][column].children[0].enableButton(false);
 	}
 
+	pushStepsToArr(currentRow_A, currentColumn_A, currentRow_B, currentColumn_B, sideToGo) {
+		for (let i = 0; i < 4; i++) {
+			let row = currentRow_A;
+			let column = currentColumn_A;
+			if (i < 2) {
+				row += -1 + 2 * (i % 2); // left right
+			}
+			else {
+				column += -1 + 2 * (i % 2); // up down
+			}
+
+			if (row < 0 || row >= GameDefine.ROW_NUM || column < 0 || column >= GameDefine.COLUMN_NUM) {
+				continue;
+			}
+
+			if (this.arrBlocks_Path[row][column] == 0) {
+				const vectorAB_X = currentRow_B - row;
+				const vectorAB_Y = currentColumn_B - column;
+				const distance = Math.sqrt(vectorAB_X * vectorAB_X + vectorAB_Y * vectorAB_Y);
+				sideToGo.push(distance / (Math.floor(distance / 10) + 1) / 10 + i + 1);
+			}
+		}
+	}
+
 	findPath(A, B) {
 		const currentColumn_A = A.index_X;
 		const currentRow_A = A.index_Y;
@@ -395,46 +341,16 @@ class Board extends PIXI.Container {
 		const currentRow_B = B.index_Y;
 
 		if (A == B) {
-			this.arrBlocks[currentRow_A][currentColumn_A].tint = GameDefine.COLOR[0];
+			// this.arrBlocks[currentRow_A][currentColumn_A].tint = GameDefine.COLOR[0];
+			this.choosenBlock.path.push(this.arrBlocks[currentRow_A][currentColumn_A]);
 			return true;
 		}
 
-		this.arrBlocks[currentRow_A][currentColumn_A].tint = GameDefine.COLOR[0];
+		// this.arrBlocks[currentRow_A][currentColumn_A].tint = GameDefine.COLOR[0];
+		this.choosenBlock.path.push(this.arrBlocks[currentRow_A][currentColumn_A]);
 
 		let sideToGo = [];
-		if (currentRow_A - 1 >= 0) { // check up side
-			if (this.arrBlocks_Path[currentRow_A - 1][currentColumn_A] == 0) {
-				const vectorAB_X = currentRow_B - (currentRow_A - 1);
-				const vectorAB_Y = currentColumn_B - (currentColumn_A);
-				const distance = Math.sqrt(vectorAB_X * vectorAB_X + vectorAB_Y * vectorAB_Y);
-				sideToGo.push(distance / (Math.floor(distance / 10) + 1) / 10 + 1);
-			}
-		}
-		if (currentRow_A + 1 < GameDefine.ROW_NUM) { // check down side
-			if (this.arrBlocks_Path[currentRow_A + 1][currentColumn_A] == 0) {
-				const vectorAB_X = currentRow_B - (currentRow_A + 1);
-				const vectorAB_Y = currentColumn_B - (currentColumn_A);
-				const distance = Math.sqrt(vectorAB_X * vectorAB_X + vectorAB_Y * vectorAB_Y);
-				sideToGo.push(distance / (Math.floor(distance / 10) + 1) / 10 + 2);
-			}
-		}
-		if (currentColumn_A - 1 >= 0) { // check left side
-			if (this.arrBlocks_Path[currentRow_A][currentColumn_A - 1] == 0) {
-				const vectorAB_X = currentRow_B - (currentRow_A);
-				const vectorAB_Y = currentColumn_B - (currentColumn_A - 1);
-				const distance = Math.sqrt(vectorAB_X * vectorAB_X + vectorAB_Y * vectorAB_Y);
-				sideToGo.push(distance / (Math.floor(distance / 10) + 1) / 10 + 3);
-			}
-		}
-		if (currentColumn_A + 1 < GameDefine.COLUMN_NUM) { // check right side
-			if (this.arrBlocks_Path[currentRow_A][currentColumn_A + 1] == 0) {
-				const vectorAB_X = currentRow_B - (currentRow_A);
-				const vectorAB_Y = currentColumn_B - (currentColumn_A + 1);
-				const distance = Math.sqrt(vectorAB_X * vectorAB_X + vectorAB_Y * vectorAB_Y);
-				sideToGo.push(distance / (Math.floor(distance / 10) + 1) / 10 + 4);
-			}
-		}
-
+		this.pushStepsToArr(currentRow_A, currentColumn_A, currentRow_B, currentColumn_B, sideToGo);
 		sideToGo.sort(function (a, b) { return b % 1 - a % 1 });
 
 		let isCanFindPath = false;
@@ -451,7 +367,8 @@ class Board extends PIXI.Container {
 						return isCanFindPath;
 					}
 
-					this.arrBlocks[currentRow_A - 1][currentColumn_A].tint = 0xffffff;
+					// this.arrBlocks[currentRow_A - 1][currentColumn_A].tint = 0xffffff;
+					this.choosenBlock.path.pop();
 				}
 			}
 			else if (nextStep == 2) { // down
@@ -462,7 +379,8 @@ class Board extends PIXI.Container {
 						return isCanFindPath;
 					}
 
-					this.arrBlocks[currentRow_A + 1][currentColumn_A].tint = 0xffffff;
+					// this.arrBlocks[currentRow_A + 1][currentColumn_A].tint = 0xffffff;
+					this.choosenBlock.path.pop();
 				}
 			}
 			else if (nextStep == 3) { // left
@@ -473,7 +391,8 @@ class Board extends PIXI.Container {
 						return isCanFindPath;
 					}
 
-					this.arrBlocks[currentRow_A][currentColumn_A - 1].tint = 0xffffff;
+					// this.arrBlocks[currentRow_A][currentColumn_A - 1].tint = 0xffffff;
+					this.choosenBlock.path.pop();
 				}
 			}
 			else if (nextStep == 4) { // right
@@ -484,7 +403,8 @@ class Board extends PIXI.Container {
 						return isCanFindPath;
 					}
 
-					this.arrBlocks[currentRow_A][currentColumn_A + 1].tint = 0xffffff;
+					// this.arrBlocks[currentRow_A][currentColumn_A + 1].tint = 0xffffff;
+					this.choosenBlock.path.pop();
 				}
 			}
 		}
@@ -498,6 +418,10 @@ class Board extends PIXI.Container {
 				this.arrBlocks_Path[row][column] = this.arrBlocks_Value[row][column] != 0;
 			}
 		}
+	}
+
+	enableClick(isEnable) {
+		this.canClick = isEnable;
 	}
 }
 export default Board;

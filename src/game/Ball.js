@@ -23,10 +23,12 @@ class Ball extends PIXI.extras.AnimatedSprite {
 			this.spawn_anim.push(PIXI.Texture.from(`data/image/ball/ball_spawn_${val}.png`));
 		}
 
-		this.scaleWhenChosen = 1;
+		this.isSuspend = true;
 		this.color;
 
 		this.isExploded = false;
+
+		this.path = [];
 	}
 
 	enableEvent(event, callback) {
@@ -53,44 +55,76 @@ class Ball extends PIXI.extras.AnimatedSprite {
 
 	playExplode() {
 		this.textures = this.explode_anim;
-		this.animationSpeed = 0.2;
+		this.animationSpeed = GameDefine.BALL_EXPLODE_SPEED;
 		this.loop = false;
 		this.play();
-		this.onComplete = function() { this.destroy(); };
+		this.onComplete = function () { this.destroy(); };
 	}
 
 	playChosen() {
 		this.textures = this.chosen_anim;
-		this.animationSpeed = 0.4;
+		this.animationSpeed = GameDefine.BALL_CHOSEN_SPEED;
 		this.loop = true;
 		this.play();
 	}
 
 	playSpawn() {
 		this.textures = this.spawn_anim;
-		this.animationSpeed = 0.4;
+		this.animationSpeed = GameDefine.BALL_SPAWN_SPEED;
 		this.loop = false;
 		this.play();
-		this.onComplete = function() {
+		this.onComplete = function () {
 			this.texture = this.idle_anim[0];
 		};
 	}
 
-	onCLick() {
-		this.playChosen();
-		let board = this.parent.parent;
-		for (let row = 0; row < GameDefine.ROW_NUM; row++) {
-			for (let column = 0; column < GameDefine.COLUMN_NUM; column++) {
-				board.arrBlocks[row][column].tint = 0xffffff;
-			}
+	playMove() {
+		if (this.path.length) {
+			const block = this.path.shift();
+			block.addChild(this);
+			this.textures = this.spawn_anim;
+			this.animationSpeed = GameDefine.BALL_MOVE_SPEED;
+			this.loop = false;
+			this.play();
+			this.onComplete = function () {
+				this.playMove();
+			};
 		}
+		else {
+			this.onComplete = null;
+
+			let board = this.parent.parent;
+			board.checkBlockAt(this.parent, true);
+
+			for(let i = 0; i < 2; i++) {
+				board.spawn();
+			}
+
+			let gamestate = require('./GS_Ingame');
+			gamestate.resetTimer();
+
+			board.enableClick(true);
+		}
+
+	}
+
+	clearPath() {
+		while(this.path.length) {
+			this.path.pop();
+		}
+	}
+
+	onCLick() {
+		let board = this.parent.parent;
+
+		if(board.canClick == false) {
+			return;
+		} 
+
+		this.playChosen();
 
 		if (board.choosenBlock != null) {
 			board.choosenBlock.playIdle();
-			board.choosenBlock.scale.x = board.choosenBlock.scale.x / this.scaleWhenChosen;
-			board.choosenBlock.scale.y = board.choosenBlock.scale.y / this.scaleWhenChosen;
-			board.choosenBlock.scale.x = board.choosenBlock.scale.x * this.scaleWhenChosen;
-			board.choosenBlock.scale.y = board.choosenBlock.scale.y * this.scaleWhenChosen;
 			if (board.choosenBlock != this) {
 				board.choosenBlock = this;
 			}
@@ -100,8 +134,6 @@ class Ball extends PIXI.extras.AnimatedSprite {
 		}
 		else {
 			board.choosenBlock = this;
-			board.choosenBlock.scale.x = board.choosenBlock.scale.x * this.scaleWhenChosen;
-			board.choosenBlock.scale.y = board.choosenBlock.scale.y * this.scaleWhenChosen;
 		}
 	}
 

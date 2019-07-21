@@ -55,13 +55,6 @@ class GS_MainMenu extends PIXI.Container {
         StateManager.SwitchState(GS_Ingame);
     }
     Update(deltaTime){
-        this.hueCounter += deltaTime;
-
-        if (this.hueCounter > 360) {
-            this.hueCounter = 0;
-        }
-
-        this.title.filters[0].hue(this.hueCounter);
     }
 
     Unload() {

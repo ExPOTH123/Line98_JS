@@ -32,8 +32,9 @@ class GS_Ingame extends PIXI.Container {
         this.board = new Board();
         this.addChild(this.board);
         this.board.load();
-        this.board.spawn();
-        this.board.spawn();
+        for(let i = 0; i < 3; i++) {
+            this.board.spawn();
+        }
         this.board.x = 0;
         this.board.y = (GameConfig.height - GameConfig.width) / 2;
 
@@ -50,8 +51,8 @@ class GS_Ingame extends PIXI.Container {
         this.retry_Button = new PIXI.Sprite(this.texture_RetryButton);
         this.addChild(this.retry_Button);
         this.retry_Button.width = this.retry_Button.height = GameConfig.width / 6;
-        this.retry_Button.x = GameConfig.width * 0.25;
-        this.retry_Button.y = GameConfig.height * 0.9;
+        this.retry_Button.x = this.retry_Button.width;
+        this.retry_Button.y = GameConfig.height - this.retry_Button.height;
         this.retry_Button.anchor.set(0.5);
         this.retry_Button.buttonMode = true;
         this.retry_Button.interactive = true;
@@ -61,8 +62,8 @@ class GS_Ingame extends PIXI.Container {
         this.back_Button = new PIXI.Sprite(this.texture_BackButton);
         this.addChild(this.back_Button);
         this.back_Button.width = this.back_Button.height = GameConfig.width / 6;
-        this.back_Button.x = GameConfig.width * 0.75;
-        this.back_Button.y = GameConfig.height * 0.9;
+        this.back_Button.x = GameConfig.width - this.back_Button.width;
+        this.back_Button.y = GameConfig.height - this.back_Button.height;
         this.back_Button.anchor.set(0.5);
         this.back_Button.buttonMode = true;
         this.back_Button.interactive = true;
@@ -98,7 +99,9 @@ class GS_Ingame extends PIXI.Container {
     }
 
     spawnBall() {
-        this.board.spawn();
+        for(let i = 0; i < 2; i++) {
+            this.board.spawn();
+        }
     }
 
     addScore(score) {

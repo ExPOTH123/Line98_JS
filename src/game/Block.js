@@ -27,17 +27,25 @@ class Block extends PIXI.Sprite {
 	onCLick() {
 		let board = this.parent;
 
+		if(board.canClick == false) {
+			return;
+		} 
+
 		if (board.choosenBlock == null) {
 			return;
 		}
 
 		if (this.children[0]) {
-			if (this.children[0].interactive == false) {
+			if (this.children[0].isSuspend == true) {
 				this.children[0].destroy();
 			}
 			else {
 				return;
 			}
+		}
+
+		if (this.children[0] == board.choosenBlock) {
+			return;
 		}
 
 		let choosenBlock = board.choosenBlock;
@@ -49,24 +57,18 @@ class Block extends PIXI.Sprite {
 		if (choosenBlock != null) {
 			choosenBlock.playSpawn();
 			board.recloneArrPath();
-			if (choosenBlock.parent != this && board.findPath(choosenBlock.parent, this)) {
+			if (board.findPath(choosenBlock.parent, this)) {
 				board.recloneArrPath(board.arrBlocks_Value);
 				board.arrBlocks_Value[blockY][blockX] = board.arrBlocks_Value[ballY][ballX];
 				board.arrBlocks_Value[ballY][ballX] = 0;
-				board.choosenBlock.scale.x = board.choosenBlock.scale.x / board.choosenBlock.scaleWhenChosen;
-				board.choosenBlock.scale.y = board.choosenBlock.scale.y / board.choosenBlock.scaleWhenChosen;
-				this.addChild(board.choosenBlock);
-
+				board.enableClick(false);
+				
+				board.choosenBlock.playMove();
 				board.choosenBlock = null;
-				board.checkBlockAt(this, true);
-
-				board.spawn();
-
-				let gamestate = require('./GS_Ingame');
-				gamestate.resetTimer();
 			}
 			else {
 				board.choosenBlock.playChosen();
+				board.choosenBlock.clearPath();
 			}
 		}
 	}
