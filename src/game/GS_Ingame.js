@@ -98,6 +98,18 @@ class GS_Ingame extends PIXI.Container {
         this.timeCounter.resetTime();
     }
 
+    stopTimer() {
+        this.timeCounter.stop();
+    }
+
+    resumeTimer() {
+        this.timeCounter.resume();
+    }
+
+    startTimer() {
+        this.timeCounter.start();
+    }
+
     spawnBall() {
         for(let i = 0; i < 2; i++) {
             this.board.spawn();
@@ -110,6 +122,11 @@ class GS_Ingame extends PIXI.Container {
 
     Unload() {
         this.removeChildren();
+    }
+
+    gameOver() {
+        const GS_GameOver = require('../game/GS_GameOver');
+        StateManager.SwitchState(GS_GameOver);
     }
 
     onRetryClick() {

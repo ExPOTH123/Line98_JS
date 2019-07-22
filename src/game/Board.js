@@ -58,6 +58,8 @@ class Board extends PIXI.Container {
 	spawn() {
 		this.stepsCount++;
 
+		let totalFail = 0;
+
 		if (this.stepsCount % GameDefine.STEPS_TO_SPAWN) {
 			if (!this.isCanSpawn) {
 				return true;;
@@ -88,8 +90,8 @@ class Board extends PIXI.Container {
 					if (indexToSpawn[i] >= maxBlockNum) {
 						failCount++;
 						if (failCount > 2) {
-							this.isGameOver = true;
-							return false;
+							totalFail++;
+							break;
 						}
 						indexToSpawn[i] -= maxBlockNum;
 					}
@@ -97,18 +99,20 @@ class Board extends PIXI.Container {
 					realIndex_Columns = Math.floor(indexToSpawn[i] % GameDefine.COLUMN_NUM);
 				}
 
-				let colorIndex = this.randomColor(); // Random color
-				let block = this.arrBlocks[realIndex_Row][realIndex_Columns];
-				let newBall = this.spawnBall(block, GameDefine.COLOR[colorIndex]);
-
-				// Set new ball to suspend mode
-					newBall.scale.x = GameDefine.BALL_SIZE_ON_SUSPEND;
-					newBall.scale.y = GameDefine.BALL_SIZE_ON_SUSPEND;
-					newBall.enableButton(false);
-					this.ballAboutToSpawn[i] = newBall;
-				
-
-				newBall.color = colorIndex;
+				if(totalFail < 3) {
+					let colorIndex = this.randomColor(); // Random color
+					let block = this.arrBlocks[realIndex_Row][realIndex_Columns];
+					let newBall = this.spawnBall(block, GameDefine.COLOR[colorIndex]);
+	
+					// Set new ball to suspend mode
+						newBall.scale.x = GameDefine.BALL_SIZE_ON_SUSPEND;
+						newBall.scale.y = GameDefine.BALL_SIZE_ON_SUSPEND;
+						newBall.enableButton(false);
+						this.ballAboutToSpawn[i] = newBall;
+					
+	
+					newBall.color = colorIndex;
+				}
 			}
 		}
 		else {
@@ -116,6 +120,13 @@ class Board extends PIXI.Container {
 		}
 
 		this.isStartGame = true;
+
+		if(totalFail >= 3) {
+			this.isGameOver = true;
+			const GS_Ingame = require('../game/GS_Ingame');
+			GS_Ingame.gameOver();
+			return false;
+		}
 
 		return true;
 	}

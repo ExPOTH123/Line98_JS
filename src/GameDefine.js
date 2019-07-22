@@ -13,7 +13,7 @@ class GameDefine
 
 		this.OUT_LINE = 0;
 
-		this.COLOR = [0xff0000, 0xbfff00, 0x0080ff];
+		this.COLOR = [0xff0000, 0xbfff00, 0x0080ff, 0x00C3C5, 0xFFFF00, 0x9B0099, 0xFF6600];
 
 		this.TIME_PER_TURN = 10;
 
@@ -22,6 +22,7 @@ class GameDefine
 		this.BALL_CHOSEN_SPEED = 0.4;
 		this.BALL_EXPLODE_SPEED = 0.2;
 		this.BALL_MOVE_SPEED = 2.0;
+		this.BALL_SIZE_WHEN_MOVE = 0.3;
 	}
 }
 module.exports = new GameDefine();

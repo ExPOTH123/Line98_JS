@@ -79,29 +79,47 @@ class Ball extends PIXI.extras.AnimatedSprite {
 	}
 
 	playMove() {
-		if (this.path.length) {
-			const block = this.path.shift();
-			block.addChild(this);
-			this.textures = this.spawn_anim;
-			this.animationSpeed = GameDefine.BALL_MOVE_SPEED;
-			this.loop = false;
-			this.play();
-			this.onComplete = function () {
-				this.playMove();
-			};
+		if (this.path.length - 1) {
+			const vector_X = this.path[1].x - this.path[0].x;
+			const vector_Y = this.path[1].y - this.path[0].y;
+			console.log(this.x + " " + vector_X + " " + this.y + " " +  vector_Y);
+
+			if (this.x == this.path[1].x && this.y == this.path[1].y) {
+				this.path.shift();
+			}
+			else {
+				this.x += vector_X / 5;
+				this.y += vector_Y / 5;
+			}
+
+			requestAnimationFrame(()=>this.playMove());
+			// const block = this.path.shift();
+			// block.addChild(this);
+			// this.textures = this.spawn_anim;
+			// this.animationSpeed = GameDefine.BALL_MOVE_SPEED;
+			// this.loop = false;
+			// this.play();
+			// this.onComplete = function () {
+			// 	this.playMove();
+			// };
 		}
 		else {
+			const block = this.path.shift();
+			this.x = this.y = 0;
+			this.scale.x = this.scale.y = 1;
+			block.addChild(this);
+
 			this.onComplete = null;
 
 			let board = this.parent.parent;
 			board.checkBlockAt(this.parent, true);
 
-			for(let i = 0; i < 2; i++) {
+			for (let i = 0; i < 2; i++) {
 				board.spawn();
 			}
 
 			let gamestate = require('./GS_Ingame');
-			gamestate.resetTimer();
+			gamestate.startTimer();
 
 			board.enableClick(true);
 		}
@@ -109,7 +127,7 @@ class Ball extends PIXI.extras.AnimatedSprite {
 	}
 
 	clearPath() {
-		while(this.path.length) {
+		while (this.path.length) {
 			this.path.pop();
 		}
 	}
@@ -117,9 +135,9 @@ class Ball extends PIXI.extras.AnimatedSprite {
 	onCLick() {
 		let board = this.parent.parent;
 
-		if(board.canClick == false) {
+		if (board.canClick == false) {
 			return;
-		} 
+		}
 
 		this.playChosen();
 
